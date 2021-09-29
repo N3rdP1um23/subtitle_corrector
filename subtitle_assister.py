@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
 import os
-from tkinter.constants import END
+from tkinter.constants import END, RAISED
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -60,7 +60,7 @@ class assister_application:
     # The following function is used to handle setting up the application header
     def setup_header(self):
         # Create the top frame that holds the application information
-        frame = tk.Frame(self.window, bg = 'white', height = 100)
+        frame = tk.Frame(self.window, bg = 'white', height = 100, borderwidth = 1)
 
         # Append the header heading and subheadding
         tk.Label(frame, text ='Subtitle Assister', font = 'Helvetica 12 bold', bg = 'white').place(x = 8, y = 20)
@@ -69,8 +69,8 @@ class assister_application:
         # Pack the frame onto the window
         frame.pack(side = 'top', fill = 'x')
 
-        # Add the separator for visual separation
-        ttk.Separator(self.window, orient = 'horizontal').place(x = 0, y = 100, relwidth = 1)
+        # # Add the separator for visual separation
+        ttk.Separator(self.window, orient = 'horizontal').pack(side = 'top', fill = 'x')
 
     # The following function is used to setup the queue side of the display
     def setup_queue(self):
