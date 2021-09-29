@@ -527,7 +527,7 @@ class assister_application:
                 # Check to see if the current line is the one that matches
                 if line.isupper():
                     # Zero out the line
-                    current_data['text'][index] = ''
+                    current_data['text'].pop(index)
             elif True:
                 # Check to see if the current line is the one that matches
                 if re.search(r'^\-\S', line):
