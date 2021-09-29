@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
 import os
-from tkinter.constants import END, LEFT, RAISED
+from tkinter.constants import END, LEFT, NW, RAISED, SW, TOP, X
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -60,17 +60,17 @@ class assister_application:
     # The following function is used to handle setting up the application header
     def setup_header(self):
         # Create the top frame that holds the application information
-        frame = tk.Frame(self.window, bg = 'white', height = 100, borderwidth = 1)
+        frame = tk.Frame(self.window, bg = 'white', height = 100, pady = 25, padx = 20)
 
         # Append the header heading and subheadding
-        tk.Label(frame, text ='Subtitle Assister', font = 'Helvetica 12 bold', bg = 'white').place(x = 8, y = 20)
-        tk.Label(frame, text = 'Your helping hand when modifying and correcting subtitles!', font = 'Helvetica 12', bg = 'white').place(x = 10, y = 44)
+        tk.Label(frame, text ='Subtitle Assister', font = 'Helvetica 12 bold', bg = 'white').pack(anchor = NW)
+        tk.Label(frame, text = 'Your helping hand when modifying and correcting subtitles!', font = 'Helvetica 12', bg = 'white').pack(anchor = SW)
 
         # Pack the frame onto the window
-        frame.pack(side = 'top', fill = 'x')
+        frame.pack(side = TOP, fill = X)
 
         # # Add the separator for visual separation
-        ttk.Separator(self.window, orient = 'horizontal').pack(side = 'top', fill = 'x')
+        ttk.Separator(self.window, orient = 'horizontal').pack(side = TOP, fill = X)
 
     # The following function is used to setup the queue side of the display
     def setup_queue(self):
