@@ -266,7 +266,7 @@ class assister_application:
             self.lbxQueue.selection_clear(0, END)
             self.lbxQueue.delete(0, END)
             self.selected_files = []
-            
+
         # Clear the queue, selected files, inputs, and reset states
         self.drpOperation.configure(state = NORMAL)
         self.current_file_index = -1
