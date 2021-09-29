@@ -212,13 +212,13 @@ class assister_application:
         pointer_frame.pack(side = LEFT)
 
         # Add the action buttons to the view
-        self.btnApprove = tk.Button(frame, text = 'Approve', command = self.approve_section, width = 15, height = 2, bg = '#6DA34D', fg = 'white', font = 'Helvetica 9 bold')
+        self.btnApprove = tk.Button(frame, text = 'Approve', command = self.approve_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#6DA34D', fg = 'white',
         self.btnApprove.configure(state = DISABLED)
         self.btnApprove.pack(side = RIGHT)
-        self.btnSkip = tk.Button(frame, text = 'Skip', command = self.skip_section, width = 15, height = 2, bg = '#FE4A49', fg = 'white', font = 'Helvetica 9 bold')
+        self.btnSkip = tk.Button(frame, text = 'Skip', command = self.skip_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkip.configure(state = DISABLED)
         self.btnSkip.pack(side = RIGHT, padx = 5)
-        self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, bg = '#4464AD', fg = 'white', font = 'Helvetica 9 bold')
+        self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
         self.btnEdit.pack(side = RIGHT)
 
