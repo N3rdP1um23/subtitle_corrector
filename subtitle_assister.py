@@ -546,7 +546,15 @@ class assister_application:
             modified_sections = []
 
             # Iterate over the file data
-            for section in self.file_data:
+            for index, section in enumerate(self.file_data):
+                # Check to see if the full section is empty
+                if len(section['text']) == 0:
+                    # Upcate the remaining section indexes
+                    self.file_data[index:] = [int(section['index']) + 1 for section in self.file_data[(index + 1):]]
+
+                    # Skip the current section
+                    continue
+
                 # Append the data to the modified section
                 modified_sections.append(section['index'] + '\n' + section['time'] + '\n' + '\n'.join(section['text']))
 
