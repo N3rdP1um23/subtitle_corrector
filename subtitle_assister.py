@@ -4,7 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 import os
-from tkinter.constants import BOTH, BOTTOM, DISABLED, E, END, HORIZONTAL, LEFT, N, NE, NONE, NW, RIGHT, S, SE, SW, TOP, VERTICAL, W, X, Y
+from tkinter.constants import BOTH, BOTTOM, DISABLED, E, END, HORIZONTAL, LEFT, N, NE, NONE, NORMAL, NW, RIGHT, S, SE, SW, TOP, VERTICAL, W, X, Y
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -249,32 +249,35 @@ class assister_application:
             mb.showerror(title = 'Queue Empty', message = 'Please add files to the queue before starting.')
         else:
             # Disable the operations dropdown
-            self.drpOperation.configure(state = 'disabled')
+            self.drpOperation.configure(state = DISABLED)
 
             # Enable the view buttons
-            self.btnEdit.configure(state = 'normal')
-            self.btnSkip.configure(state = 'normal')
-            self.btnApprove.configure(state = 'normal')
+            self.btnEdit.configure(state = NORMAL)
+            self.btnSkip.configure(state = NORMAL)
+            self.btnApprove.configure(state = NORMAL)
 
             # Call the function that's used to handle changing the current file pointer
             self.change_file()
 
     # The following function is used to handle clearing the application
-    def clear_application(self):
+    def clear_application(self, clear_queue = True):
+        # Check to see if the user would like to clear the queue also
+        if clear_queue:
+            self.lbxQueue.selection_clear(0, END)
+            self.lbxQueue.delete(0, END)
+            self.selected_files = []
+            
         # Clear the queue, selected files, inputs, and reset states
-        self.lbxQueue.selection_clear(0, END)
-        self.lbxQueue.delete(0, END)
-        self.selected_files = []
-        self.drpOperation.configure(state = 'normal')
+        self.drpOperation.configure(state = NORMAL)
         self.current_file_index = -1
 
         # Call the function that's used for clearing the file viewer items
         self.clear_file_viewer()
 
         # Disable the view buttons again
-        self.btnEdit.configure(state = 'disabled')
-        self.btnSkip.configure(state = 'disabled')
-        self.btnApprove.configure(state = 'disabled')
+        self.btnEdit.configure(state = DISABLED)
+        self.btnSkip.configure(state = DISABLED)
+        self.btnApprove.configure(state = DISABLED)
 
         # Reset the progress bar
         self.pgbQueue['value'] = 0
@@ -282,15 +285,15 @@ class assister_application:
     # The foloowing function is used to handle clearing the file viewer items
     def clear_file_viewer(self):
         # Clear file viewer items
-        self.txtFileViewer.configure(state = 'normal')
+        self.txtFileViewer.configure(state = NORMAL)
         self.txtFileViewer.delete(1.0, END)
-        self.txtFileViewer.configure(state = 'disabled')
-        self.txtOldSection.configure(state = 'normal')
+        self.txtFileViewer.configure(state = DISABLED)
+        self.txtOldSection.configure(state = NORMAL)
         self.txtOldSection.delete(1.0, END)
-        self.txtOldSection.configure(state = 'disabled')
-        self.txtNewSection.configure(state = 'normal')
+        self.txtOldSection.configure(state = DISABLED)
+        self.txtNewSection.configure(state = NORMAL)
         self.txtNewSection.delete(1.0, END)
-        self.txtNewSection.configure(state = 'disabled')
+        self.txtNewSection.configure(state = DISABLED)
         self.current_index = 0
         self.total_items = 0
         self.lblCurrentMatch['text'] = str(self.current_index)
@@ -353,7 +356,7 @@ class assister_application:
             mb.showinfo(title = 'Queue Complete', message = 'Operation complete successfully!')
 
             # Call the function to handle clearing the application
-            self.clear_application()
+            self.clear_application(clear_queue = False)
 
             # Return to stop further processing
             return
