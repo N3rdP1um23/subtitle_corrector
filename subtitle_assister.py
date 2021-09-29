@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
 import os
-from tkinter.constants import END, RAISED
+from tkinter.constants import END, LEFT, RAISED
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -75,7 +75,7 @@ class assister_application:
     # The following function is used to setup the queue side of the display
     def setup_queue(self):
         # Add the file open button label
-        tk.Label(self.window, text = 'Open Files', font = 'Helvetica 12 bold').place(x = 10, y = 120)
+        tk.Label(self.window, text = 'Open Files', font = 'Helvetica 12 bold').pack(side = LEFT)
 
         # Add the file open button
         tk.Button(self.window, text = 'Open File(s)', command = self.gather_subtitle_file, width = 25).place(x = 10, y = 150)
