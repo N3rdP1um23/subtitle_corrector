@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
 import os
-from tkinter.constants import END, LEFT, NW, RAISED, SW, TOP, X
+from tkinter.constants import BOTH, END, HORIZONTAL, LEFT, NW, RAISED, SW, TOP, VERTICAL, W, X, Y
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -60,7 +60,7 @@ class assister_application:
     # The following function is used to handle setting up the application header
     def setup_header(self):
         # Create the top frame that holds the application information
-        frame = tk.Frame(self.window, bg = 'white', height = 100, pady = 25, padx = 20)
+        frame = tk.Frame(self.window, bg = 'white', height = 100, pady = 25, padx = 10)
 
         # Append the header heading and subheadding
         tk.Label(frame, text ='Subtitle Assister', font = 'Helvetica 12 bold', bg = 'white').pack(anchor = NW)
@@ -69,48 +69,53 @@ class assister_application:
         # Pack the frame onto the window
         frame.pack(side = TOP, fill = X)
 
-        # # Add the separator for visual separation
-        ttk.Separator(self.window, orient = 'horizontal').pack(side = TOP, fill = X)
+        # Add the separator for visual separation
+        ttk.Separator(self.window, orient = HORIZONTAL).pack(side = TOP, fill = X)
 
     # The following function is used to setup the queue side of the display
     def setup_queue(self):
+        # Create the top frame that holds the queue section
+        frame = tk.Frame(self.window, pady = 25, padx = 10)
+
         # Add the file open button label
-        tk.Label(self.window, text = 'Open Files', font = 'Helvetica 12 bold').pack(side = LEFT)
+        tk.Label(frame, text = 'Open Files', font = 'Helvetica 12 bold').pack(anchor = W)
 
         # Add the file open button
-        tk.Button(self.window, text = 'Open File(s)', command = self.gather_subtitle_file, width = 25).place(x = 10, y = 150)
+        tk.Button(frame, text = 'Open File(s)', command = self.gather_subtitle_file).pack(pady = 5, fill = X)
 
         # Add the operation label
-        tk.Label(self.window, text = 'Operation', font = 'Helvetica 12 bold').place(x = 10, y = 185)
+        tk.Label(frame, text = 'Operation', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
 
         # Grab the default option for the dropdown
-        self.selected_operation = tk.StringVar(self.window, self.operations[0])
+        self.selected_operation = tk.StringVar(frame, self.operations[0])
 
         # Add the dropdown with the available operations
-        self.drpOperation = ttk.OptionMenu(self.window, self.selected_operation, self.operations[0], *self.operations)
-        self.drpOperation.config(width = 25)
-        self.drpOperation.place(x = 10, y = 215)
+        self.drpOperation = ttk.OptionMenu(frame, self.selected_operation, self.operations[0], *self.operations)
+        self.drpOperation.pack(pady = 5, fill = X)
 
         # Add the queue label
-        tk.Label(self.window, text = 'Queue', font = 'Helvetica 12 bold').place(x = 10, y = 245)
+        tk.Label(frame, text = 'Queue', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
 
         # Add the queue list
-        self.lbxQueue = tk.Listbox(self.window, width = 30, height = 36)
-        self.lbxQueue.place(x = 10, y = 275)
+        self.lbxQueue = tk.Listbox(frame)
+        self.lbxQueue.pack(fill = BOTH, expand = True)
 
         # Add the start and clear buttons
-        tk.Button(self.window, text = 'Start', command = self.start_operation, width = 25).place(x = 10, y = 865)
-        tk.Button(self.window, text = 'Clear', command = self.clear_application, width = 25).place(x = 10, y = 900)
+        tk.Button(frame, text = 'Start', command = self.start_operation).pack(pady = 5, fill = X)
+        tk.Button(frame, text = 'Clear', command = self.clear_application).pack(pady = 5, fill = X)
 
         # Add the queue label
-        tk.Label(self.window, text = 'Progress', font = 'Helvetica 12 bold').place(x = 10, y = 940)
+        tk.Label(frame, text = 'Progress', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
 
         # Add the overall queue progress bar
-        self.pgbQueue = ttk.Progressbar(self.window, orient = 'horizontal', length = 190, mode = 'determinate')
-        self.pgbQueue.place(x = 10, y = 970)
+        self.pgbQueue = ttk.Progressbar(frame, orient = HORIZONTAL, mode = 'determinate')
+        self.pgbQueue.pack(fill = X)
+
+        # Pack the frame onto the window
+        frame.pack(side = LEFT, fill = BOTH)
 
         # Add the queue separator
-        ttk.Separator(self.window, orient = 'vertical').place(x = 210, y = 100, relheight = 1)
+        ttk.Separator(self.window, orient = VERTICAL).pack(side = LEFT, fill = Y)
 
     # The following function is used to handle setting up the viewer and old new sections
     def setup_viewer(self):
