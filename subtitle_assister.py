@@ -330,6 +330,11 @@ class assister_application:
         current_section = [section for section in self.file_data if section['index'] == current_line_index][0]
         current_section['text'] = current_modifications['text']
 
+        # Check to see if the section ends up blank
+        if len(current_section['text']) == 0:
+            # Remove the current section
+            self.file_data = [section for section in self.file_data if section['index'] != current_line_index]
+
         # Correct the new section text area to not be editable
         self.edit_new_section(disabled = True)
 
@@ -546,17 +551,9 @@ class assister_application:
             modified_sections = []
 
             # Iterate over the file data
-            for index, section in enumerate(self.file_data):
-                # Check to see if the full section is empty
-                if len(section['text']) == 0:
-                    # Upcate the remaining section indexes
-                    self.file_data[index:] = [int(section['index']) + 1 for section in self.file_data[(index + 1):]]
-
-                    # Skip the current section
-                    continue
-
+            for index, section in enumerate(self.file_data, 1):
                 # Append the data to the modified section
-                modified_sections.append(section['index'] + '\n' + section['time'] + '\n' + '\n'.join(section['text']))
+                modified_sections.append(str(index) + '\n' + section['time'] + '\n' + '\n'.join(section['text']))
 
             # Write the modified sections to the file
             file.write('\n\n'.join(modified_sections).encode('utf-8', 'ignore').decode('utf-8'))
