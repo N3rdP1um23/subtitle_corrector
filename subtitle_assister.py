@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
 import os
-from tkinter.constants import BOTH, END, HORIZONTAL, LEFT, NW, RAISED, SW, TOP, VERTICAL, W, X, Y
+from tkinter.constants import BOTH, END, HORIZONTAL, LEFT, NW, RAISED, RIGHT, SW, TOP, VERTICAL, W, X, Y
 import re
 
 # The following is a class that's used for setting up the application GUI
@@ -119,61 +119,67 @@ class assister_application:
 
     # The following function is used to handle setting up the viewer and old new sections
     def setup_viewer(self):
+        # Create the top frame that holds the queue section
+        frame = tk.Frame(self.window, pady = 25, padx = 10)
+
         # Add the file viewer label
-        tk.Label(self.window, text = 'File Viewer', font = 'Helvetica 12 bold').place(x = 220, y = 120)
+        tk.Label(frame, text = 'File Viewer', font = 'Helvetica 12 bold').pack(anchor = W)
 
-        # Create the main input area
-        self.txtFileViewer = tk.Text(self.window, wrap = 'none', state = 'disabled')
-        self.vsbFileViewer = ttk.Scrollbar(self.window, command = self.txtFileViewer.yview, orient = 'vertical')
-        self.hsbFileViewer = ttk.Scrollbar(self.window, command = self.txtFileViewer.xview, orient = 'horizontal')
-        self.txtFileViewer.configure(yscrollcommand = self.vsbFileViewer.set, xscrollcommand = self.hsbFileViewer.set)
+        # # Create the main input area
+        # self.txtFileViewer = tk.Text(self.window, wrap = 'none', state = 'disabled')
+        # self.vsbFileViewer = ttk.Scrollbar(self.window, command = self.txtFileViewer.yview, orient = 'vertical')
+        # self.hsbFileViewer = ttk.Scrollbar(self.window, command = self.txtFileViewer.xview, orient = 'horizontal')
+        # self.txtFileViewer.configure(yscrollcommand = self.vsbFileViewer.set, xscrollcommand = self.hsbFileViewer.set)
 
-        # Place the file viewer on the page
-        self.txtFileViewer.place(x = 220, y = 150, relwidth = 0.875, relheight = 0.5)
-        self.vsbFileViewer.place(x = 1900, y = 150, relheight = 0.5)
-        self.hsbFileViewer.place(x = 220, y = 659, relwidth = 0.875)
+        # # Place the file viewer on the page
+        # self.txtFileViewer.place(x = 220, y = 150, relwidth = 0.875, relheight = 0.5)
+        # self.vsbFileViewer.place(x = 1900, y = 150, relheight = 0.5)
+        # self.hsbFileViewer.place(x = 220, y = 659, relwidth = 0.875)
 
-        # Add the color tags
-        self.txtFileViewer.tag_configure('highlight', background="#ffff99")
+        # # Add the color tags
+        # self.txtFileViewer.tag_configure('highlight', background="#ffff99")
 
-        # Add the old vs new section separator
-        ttk.Separator(self.window, orient = 'horizontal').place(x = 220, y = 690, relwidth = 1)
+        # # Add the old vs new section separator
+        # ttk.Separator(self.window, orient = 'horizontal').place(x = 220, y = 690, relwidth = 1)
 
-        # Add the old section label
-        tk.Label(self.window, text = 'Old', font = 'Helvetica 12 bold').place(x = 220, y = 700)
+        # # Add the old section label
+        # tk.Label(self.window, text = 'Old', font = 'Helvetica 12 bold').place(x = 220, y = 700)
 
-        # Add the old viewer section
-        self.txtOldSection = tk.Text(self.window, wrap = 'none', state = 'disabled')
-        self.txtOldSection.place(x = 220, y = 730, relwidth = 0.45, height = 170)
+        # # Add the old viewer section
+        # self.txtOldSection = tk.Text(self.window, wrap = 'none', state = 'disabled')
+        # self.txtOldSection.place(x = 220, y = 730, relwidth = 0.45, height = 170)
 
-        # Add the new section label
-        tk.Label(self.window, text = 'New', font = 'Helvetica 12 bold').place(x = 1100, y = 700)
+        # # Add the new section label
+        # tk.Label(self.window, text = 'New', font = 'Helvetica 12 bold').place(x = 1100, y = 700)
 
-        # Add the new viewer section
-        self.txtNewSection = tk.Text(self.window, wrap = 'none', state = 'disabled')
-        self.txtNewSection.place(x = 1100, y = 730, relwidth = 0.42, height = 170)
+        # # Add the new viewer section
+        # self.txtNewSection = tk.Text(self.window, wrap = 'none', state = 'disabled')
+        # self.txtNewSection.place(x = 1100, y = 730, relwidth = 0.42, height = 170)
 
-        # Add the action area separator
-        ttk.Separator(self.window, orient = 'horizontal').place(x = 220, y = 925, relwidth = 1)
+        # # Add the action area separator
+        # ttk.Separator(self.window, orient = 'horizontal').place(x = 220, y = 925, relwidth = 1)
 
-        # Add the action buttons to the view
-        self.btnEdit = tk.Button(self.window, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, bg = '#4464AD', fg = 'white', font = 'Helvetica 9 bold')
-        self.btnEdit.configure(state = 'disabled')
-        self.btnEdit.place(x = 1560, y = 950)
-        self.btnSkip = tk.Button(self.window, text = 'Skip', command = self.skip_section, width = 15, height = 2, bg = '#FE4A49', fg = 'white', font = 'Helvetica 9 bold')
-        self.btnSkip.configure(state = 'disabled')
-        self.btnSkip.place(x = 1680, y = 950)
-        self.btnApprove = tk.Button(self.window, text = 'Approve', command = self.approve_section, width = 15, height = 2, bg = '#6DA34D', fg = 'white', font = 'Helvetica 9 bold')
-        self.btnApprove.configure(state = 'disabled')
-        self.btnApprove.place(x = 1800, y = 950)
+        # # Add the action buttons to the view
+        # self.btnEdit = tk.Button(self.window, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, bg = '#4464AD', fg = 'white', font = 'Helvetica 9 bold')
+        # self.btnEdit.configure(state = 'disabled')
+        # self.btnEdit.place(x = 1560, y = 950)
+        # self.btnSkip = tk.Button(self.window, text = 'Skip', command = self.skip_section, width = 15, height = 2, bg = '#FE4A49', fg = 'white', font = 'Helvetica 9 bold')
+        # self.btnSkip.configure(state = 'disabled')
+        # self.btnSkip.place(x = 1680, y = 950)
+        # self.btnApprove = tk.Button(self.window, text = 'Approve', command = self.approve_section, width = 15, height = 2, bg = '#6DA34D', fg = 'white', font = 'Helvetica 9 bold')
+        # self.btnApprove.configure(state = 'disabled')
+        # self.btnApprove.place(x = 1800, y = 950)
 
-        # Add the section that shows the matches and current index
-        tk.Label(self.window, text = 'Current Match: ', font = 'Helvetica 12 bold').place(x = 220, y = 950)
-        self.lblCurrentMatch = tk.Label(self.window, text = str(self.current_index), font = 'Helvetica 12')
-        self.lblCurrentMatch.place(x = 350, y = 950)
-        tk.Label(self.window, text = 'Total Matches: ', font = 'Helvetica 12 bold').place(x = 220, y = 980)
-        self.lblTotalMatched = tk.Label(self.window, text = str(self.total_items), font = 'Helvetica 12')
-        self.lblTotalMatched.place(x = 350, y = 980)
+        # # Add the section that shows the matches and current index
+        # tk.Label(self.window, text = 'Current Match: ', font = 'Helvetica 12 bold').place(x = 220, y = 950)
+        # self.lblCurrentMatch = tk.Label(self.window, text = str(self.current_index), font = 'Helvetica 12')
+        # self.lblCurrentMatch.place(x = 350, y = 950)
+        # tk.Label(self.window, text = 'Total Matches: ', font = 'Helvetica 12 bold').place(x = 220, y = 980)
+        # self.lblTotalMatched = tk.Label(self.window, text = str(self.total_items), font = 'Helvetica 12')
+        # self.lblTotalMatched.place(x = 350, y = 980)
+
+        # Pack the frame onto the window
+        frame.pack(side = RIGHT, fill = BOTH)
 
     ###
     #
