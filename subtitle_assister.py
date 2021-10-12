@@ -12,6 +12,7 @@ class assister_application:
     # Create the class specific properties
     operations = [
         'Remove full uppercase lines',
+        'Remove lines with two or more consecutive uppercase characters',
         'Add space after line starting dash',
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and uppercase character',
@@ -86,6 +87,9 @@ class assister_application:
 
         # Add the operation label
         tk.Label(frame, text = 'Operation', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
+
+        # Sort the list of operations
+        self.operations.sort()
 
         # Grab the default option for the dropdown
         self.selected_operation = tk.StringVar(frame, self.operations[0])
@@ -469,6 +473,13 @@ class assister_application:
                 if any(re.match(r'\-[A-Z]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(re.match(r'[A-Z]{2,}', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -559,6 +570,11 @@ class assister_application:
                 if re.search(r'^\-[A-Z]', line):
                     # Correct the dash with no space
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
+            elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
+                # Check to see if the current line is the one that matches
+                if re.search(r'^[A-Z]{2,}', line):
+                    # Zero out the line
+                    current_data['text'].pop(index)
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
