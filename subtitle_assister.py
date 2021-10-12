@@ -548,13 +548,13 @@ class assister_application:
         text = current_data['text'].copy()
 
         # Iterate over the lines and correct the ones with the issue
-        for index, line in enumerate(current_data['text']):
+        for index, line in enumerate(current_data['text'].copy()):
             # Check to see if the user is removing uppercase sentances
             if current_operation == 'Remove full uppercase lines':
                 # Check to see if the current line is the one that matches
                 if line.isupper():
                     # Zero out the line
-                    current_data['text'].pop(index)
+                    current_data['text'].remove(line)
             elif current_operation == 'Add space after line starting dash':
                 # Check to see if the current line is the one that matches
                 if re.search(r'^\-\S', line):
@@ -574,7 +574,7 @@ class assister_application:
                 # Check to see if the current line is the one that matches
                 if re.search(r'^[A-Z]{2,}', line):
                     # Zero out the line
-                    current_data['text'].pop(index)
+                    current_data['text'].remove(line)
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
