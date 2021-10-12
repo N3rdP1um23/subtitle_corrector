@@ -11,8 +11,10 @@ import re
 class assister_application:
     # Create the class specific properties
     operations = [
-        'Remove uppercase words',
+        'Remove full uppercase lines',
         'Add space after line starting dash',
+        'Add space after line starting dash and lowercase character',
+        'Add space after line starting dash and uppercase character',
     ]
     supported_files = (
         ('MicroDVD/VobSub Subtitle File', '*.sub'),
@@ -439,7 +441,7 @@ class assister_application:
         sections_to_modify = []
 
         # Check to see if the user is removing uppercase sentances
-        if current_operation == 'Remove uppercase words':
+        if current_operation == 'Remove full uppercase lines':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
@@ -451,6 +453,20 @@ class assister_application:
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
                 if any(re.match(r'\-\S', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Add space after line starting dash and lowercase character':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(re.match(r'\-[a-z]', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Add space after line starting dash and uppercase character':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(re.match(r'\-[A-Z]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
 
@@ -523,14 +539,24 @@ class assister_application:
         # Iterate over the lines and correct the ones with the issue
         for index, line in enumerate(current_data['text']):
             # Check to see if the user is removing uppercase sentances
-            if current_operation == 'Remove uppercase words':
+            if current_operation == 'Remove full uppercase lines':
                 # Check to see if the current line is the one that matches
                 if line.isupper():
                     # Zero out the line
                     current_data['text'].pop(index)
-            elif True:
+            elif current_operation == 'Add space after line starting dash':
                 # Check to see if the current line is the one that matches
                 if re.search(r'^\-\S', line):
+                    # Correct the dash with no space
+                    current_data['text'][index] = '- ' + current_data['text'][index][1:]
+            elif current_operation == 'Add space after line starting dash and lowercase character':
+                # Check to see if the current line is the one that matches
+                if re.search(r'^\-[a-z]', line):
+                    # Correct the dash with no space
+                    current_data['text'][index] = '- ' + current_data['text'][index][1:]
+            elif current_operation == 'Add space after line starting dash and uppercase character':
+                # Check to see if the current line is the one that matches
+                if re.search(r'^\-[A-Z]', line):
                     # Correct the dash with no space
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
 
