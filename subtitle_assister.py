@@ -4,8 +4,8 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 import os
-from tkinter.constants import BOTH, BOTTOM, DISABLED, E, END, HORIZONTAL, LEFT, N, NE, NONE, NORMAL, NW, RIGHT, S, SE, SW, TOP, VERTICAL, W, X, Y
-import re
+from tkinter.constants import BOTH, BOTTOM, DISABLED, END, HORIZONTAL, LEFT, NONE, NORMAL, NW, RIGHT, SW, TOP, VERTICAL, W, X, Y
+import regex
 
 # The following is a class that's used for setting up the application GUI
 class assister_application:
@@ -456,28 +456,28 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.search(r'\-\S', line) for line in section['text']):
+                if any(regex.search(r'^\-\S', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and lowercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.search(r'\-[a-z]', line) for line in section['text']):
+                if any(regex.search(r'^\-[[:lower:]]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and uppercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.search(r'\-[A-Z]', line) for line in section['text']):
+                if any(regex.search(r'^\-[[:upper:]]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.search(r'[A-Z]{2,}', line) for line in section['text']):
+                if any(regex.search(r'[[:upper:]]{2,}', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
 
@@ -557,22 +557,22 @@ class assister_application:
                     current_data['text'].remove(line)
             elif current_operation == 'Add space after line starting dash':
                 # Check to see if the current line is the one that matches
-                if re.search(r'^\-\S', line):
+                if regex.search(r'^\-\S', line):
                     # Correct the dash with no space
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
             elif current_operation == 'Add space after line starting dash and lowercase character':
                 # Check to see if the current line is the one that matches
-                if re.search(r'^\-[a-z]', line):
+                if regex.search(r'^\-[[:lower:]]', line):
                     # Correct the dash with no space
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
             elif current_operation == 'Add space after line starting dash and uppercase character':
                 # Check to see if the current line is the one that matches
-                if re.search(r'^\-[A-Z]', line):
+                if regex.search(r'^\-[[:upper:]]', line):
                     # Correct the dash with no space
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
             elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
                 # Check to see if the current line is the one that matches
-                if re.search(r'[A-Z]{2,}', line):
+                if regex.search(r'[[:upper:]]{2,}', line):
                     # Zero out the line
                     current_data['text'].remove(line)
 
