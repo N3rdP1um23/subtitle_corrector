@@ -456,28 +456,28 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.match(r'\-\S', line) for line in section['text']):
+                if any(re.search(r'\-\S', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and lowercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.match(r'\-[a-z]', line) for line in section['text']):
+                if any(re.search(r'\-[a-z]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and uppercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.match(r'\-[A-Z]', line) for line in section['text']):
+                if any(re.search(r'\-[A-Z]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(re.match(r'[A-Z]{2,}', line) for line in section['text']):
+                if any(re.search(r'[A-Z]{2,}', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
 
@@ -572,7 +572,7 @@ class assister_application:
                     current_data['text'][index] = '- ' + current_data['text'][index][1:]
             elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
                 # Check to see if the current line is the one that matches
-                if re.search(r'^[A-Z]{2,}', line):
+                if re.search(r'[A-Z]{2,}', line):
                     # Zero out the line
                     current_data['text'].remove(line)
 
