@@ -232,7 +232,7 @@ class assister_application:
         self.btnEdit.pack(side = RIGHT)
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkipAll.configure(state = DISABLED)
-        self.btnSkipAll.pack(side = RIGHT, padx = 5, mgn)
+        self.btnSkipAll.pack(side = RIGHT, padx = 5)
 
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
