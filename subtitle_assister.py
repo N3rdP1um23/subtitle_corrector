@@ -642,7 +642,7 @@ class assister_application:
                         match = ''.join(match)
 
                         # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match.strip(), match.strip().title() + ('.' if match[-1] != '.' else ''))
+                        current_data['text'][index] = current_data['text'][index].replace(match.strip(), match.strip().title() + ('.' if match.strip()[-1] != '.' else ''))
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
