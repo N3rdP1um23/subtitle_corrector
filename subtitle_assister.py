@@ -227,12 +227,12 @@ class assister_application:
         self.btnSkip = tk.Button(frame, text = 'Skip', command = self.skip_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkip.configure(state = DISABLED)
         self.btnSkip.pack(side = RIGHT, padx = 5)
-        self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
-        self.btnSkipAll.configure(state = DISABLED)
-        self.btnSkipAll.pack(side = RIGHT, padx = 5)
         self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
         self.btnEdit.pack(side = RIGHT)
+        self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnSkipAll.configure(state = DISABLED)
+        self.btnSkipAll.pack(side = RIGHT, padx = 5, mgn)
 
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
@@ -327,6 +327,14 @@ class assister_application:
 
     # The following function is used to handle skipping the current section
     def skip_section(self):
+        # Call the function to handle setting up the data on the screen
+        self.setup_data()
+
+    # The following function is used to handle skipping all sections
+    def skip_all_sections(self):
+        # Update the current index to dynamically pass all sections of the current file
+        self.current_index = len(self.sections_to_modify)
+
         # Call the function to handle setting up the data on the screen
         self.setup_data()
 
