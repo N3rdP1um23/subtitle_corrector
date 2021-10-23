@@ -230,6 +230,9 @@ class assister_application:
         self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
         self.btnEdit.pack(side = RIGHT)
+        self.btnApproveAll = tk.Button(frame, text = 'Approve All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnApproveAll.configure(state = DISABLED)
+        self.btnApproveAll.pack(side = RIGHT, padx = 5)
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkipAll.configure(state = DISABLED)
         self.btnSkipAll.pack(side = RIGHT, padx = 5)
