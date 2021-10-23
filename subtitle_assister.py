@@ -230,7 +230,7 @@ class assister_application:
         self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
         self.btnEdit.pack(side = RIGHT)
-        self.btnApproveAll = tk.Button(frame, text = 'Approve All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnApproveAll = tk.Button(frame, text = 'Approve All', command = self.approve_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnApproveAll.configure(state = DISABLED)
         self.btnApproveAll.pack(side = RIGHT, padx = 5)
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
@@ -271,6 +271,7 @@ class assister_application:
             self.btnSkip.configure(state = NORMAL)
             self.btnSkipAll.configure(state = NORMAL)
             self.btnApprove.configure(state = NORMAL)
+            self.btnApproveAll.configure(state = NORMAL)
 
             # Call the function that's used to handle changing the current file pointer
             self.change_file()
@@ -295,6 +296,7 @@ class assister_application:
         self.btnSkip.configure(state = DISABLED)
         self.btnSkipAll.configure(state = DISABLED)
         self.btnApprove.configure(state = DISABLED)
+        self.btnApproveAll.configure(state = DISABLED)
 
         # Reset the progress bar
         self.pgbQueue['value'] = 0
@@ -342,7 +344,7 @@ class assister_application:
         self.setup_data()
 
     # The following function is used to handle approving the current section
-    def approve_section(self):
+    def approve_section(self, approve_all = False):
         # Grab the current modifications
         current_modifications = self.txtNewSection.get('1.0', END)
         current_modifications = current_modifications.split('\n')
@@ -364,7 +366,12 @@ class assister_application:
         self.edit_new_section(disabled = True)
 
         # Call the function to handle setting up the data on the screen
-        self.setup_data()
+        self.setup_data(approve_all = approve_all)
+
+    # The following function is used to handle approving all sections
+    def approve_all_sections(self):
+        # Call the function to handle approving the current section - and passalong that the user wan't to approve all sections
+        self.approve_section(approve_all = True)
 
     ###
     #
@@ -529,7 +536,7 @@ class assister_application:
         self.sections_to_modify = sections_to_modify
 
     # The following function is used to handle setting up the data to have changes confirmed and modified if needed
-    def setup_data(self):
+    def setup_data(self, approve_all = False):
         # Check to see if the file has been fully modified
         if self.current_index >= len(self.sections_to_modify):
             # Call the function to handle saving the modifications to the file
@@ -568,6 +575,11 @@ class assister_application:
         # Update current match pointer and label
         self.current_index = self.current_index + 1
         self.lblCurrentMatch['text'] = str(self.current_index)
+
+        # Check to see if use has approved all sections
+        if approve_all == True:
+            # Call the fucntion to approve the section
+            self.approve_section(approve_all = approve_all)
 
     # The following function is used to handle highlighting text and scrolling to it if it's out of view
     def highlight_and_view(self, line_start, line_end):
