@@ -501,7 +501,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'(dr|esq|hon|jr|mr|mrs|miss|ms|messrs|mmes|msgr|prof|rev|rt\ hon|sr|st)\ ', line) for line in section['text']):
+                if any(regex.search(r'(dr|Dr|jr|Jr|mr|Mr|mrs|Mrs|miss|Miss|ms|Ms|sr|Sr|st|St)(\ |\.|\.\ )[[:upper:]]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
 
@@ -604,14 +604,17 @@ class assister_application:
                         current_data['text'][index] = '- ' + current_data['text'][index][1:]
             elif current_operation == 'Capitalize, add a period, and space people abbreviations':
                 # Search the string
-                results = regex.findall(r'(dr|esq|hon|jr|mr|mrs|miss|ms|messrs|mmes|msgr|prof|rev|rt\ hon|sr|st)\ ', line)
+                results = regex.findall(r'(dr|Dr|jr|Jr|mr|Mr|mrs|Mrs|miss|Miss|ms|Ms|sr|Sr|st|St)(\ |\.|\.\ )[[:upper:]]', line)
 
                 # Check to see if the current line is the one that matches
                 if results:
                     # Iterate over the matches
                     for match in results:
+                        # Update the match
+                        match = ''.join(match)
+
                         # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, match.title() + '.')
+                        current_data['text'][index] = current_data['text'][index].replace(match.strip(), match.strip().title() + ('.' if match[-1] != '.' else ''))
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
