@@ -227,6 +227,9 @@ class assister_application:
         self.btnSkip = tk.Button(frame, text = 'Skip', command = self.skip_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkip.configure(state = DISABLED)
         self.btnSkip.pack(side = RIGHT, padx = 5)
+        self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnSkipAll.configure(state = DISABLED)
+        self.btnSkipAll.pack(side = RIGHT, padx = 5)
         self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
         self.btnEdit.pack(side = RIGHT)
@@ -263,6 +266,7 @@ class assister_application:
             # Enable the view buttons
             self.btnEdit.configure(state = NORMAL)
             self.btnSkip.configure(state = NORMAL)
+            self.btnSkipAll.configure(state = NORMAL)
             self.btnApprove.configure(state = NORMAL)
 
             # Call the function that's used to handle changing the current file pointer
@@ -286,6 +290,7 @@ class assister_application:
         # Disable the view buttons again
         self.btnEdit.configure(state = DISABLED)
         self.btnSkip.configure(state = DISABLED)
+        self.btnSkipAll.configure(state = DISABLED)
         self.btnApprove.configure(state = DISABLED)
 
         # Reset the progress bar
