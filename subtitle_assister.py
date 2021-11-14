@@ -13,6 +13,7 @@ class assister_application:
     operations = [
         'Remove full uppercase lines',
         'Remove lines with two or more consecutive uppercase characters',
+        'Remove line ending dash',
         'Edit full uppercase lines',
         'Edit lines with two or more consecutive uppercase characters',
         'Add space after line starting dash',
@@ -527,6 +528,13 @@ class assister_application:
                 if any(regex.search(r'(?:^|\ )(dr(?:\ |\.|\.\ )|Dr|(?:\ |\.)jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[[:upper:]]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Remove line ending dash':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'\ *\-$', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -643,6 +651,16 @@ class assister_application:
 
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
+            elif current_operation == 'Remove line ending dash':
+                # Search the string
+                results = regex.findall(r'\ *\-$', line)
+
+                # Check to see if the current line is the one that matches
+                if results:
+                    # Iterate over the matches
+                    for match in results:
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index].replace(match, '')
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
