@@ -14,6 +14,9 @@ class assister_application:
         'Remove full uppercase lines',
         'Remove lines with two or more consecutive uppercase characters',
         'Remove line ending dash',
+        'Remove space after three dots and a lowercase word',
+        'Remove space after three dots and an uppercase word',
+        'Remove space after three dots',
         'Edit full uppercase lines',
         'Edit lines with two or more consecutive uppercase characters',
         'Add space after line starting dash',
@@ -535,6 +538,27 @@ class assister_application:
                 if any(regex.search(r'\ *\-$', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Remove space after three dots and a lowercase word':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'\.\.\.\ [[:lower:]]', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove space after three dots and an uppercase word':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'\.\.\.\ [[:upper:]]', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove space after three dots':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'\.\.\.\ ', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -661,6 +685,36 @@ class assister_application:
                     for match in results:
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index].replace(match, '')
+            elif current_operation == 'Remove space after three dots and a lowercase word':
+                # Search the string
+                results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
+
+                # Check to see if the current line is the one that matches
+                if results:
+                    # Iterate over the matches
+                    for match in results:
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+            elif current_operation == 'Remove space after three dots and an uppercase word':
+                # Search the string
+                results = regex.findall(r'\.\.\.\ [[:upper:]]', line)
+
+                # Check to see if the current line is the one that matches
+                if results:
+                    # Iterate over the matches
+                    for match in results:
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+            elif current_operation == 'Remove space after three dots':
+                # Search the string
+                results = regex.findall(r'\.\.\.\ ', line)
+
+                # Check to see if the current line is the one that matches
+                if results:
+                    # Iterate over the matches
+                    for match in results:
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
