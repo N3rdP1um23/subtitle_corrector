@@ -458,7 +458,8 @@ class assister_application:
                 self.file_data = file_content.split('\n\n') # Split the file based on any double new lines
                 self.file_data = [x for x in self.file_data if x != '\n' and x != '\n\n'] # Filter out any remaining new lines or double new lines
                 self.file_data = list(filter(None, self.file_data)) # Filter out any empty stings
-                self.file_data = [{'index': section.split('\n')[0], 'time': section.split('\n')[1], 'text': section.split('\n')[2:], 'line_number': line_numbers[section.split('\n')[0]]} for section in self.file_data]
+                self.file_data = [x for x in self.file_data if len(list(filter(None, x.split('\n')))) >= 3] # Filter out any lines that have no text
+                self.file_data = [{'index': list(filter(None, section.split('\n')))[0], 'time': list(filter(None, section.split('\n')))[1], 'text': list(filter(None, section.split('\n')))[2:], 'line_number': line_numbers[list(filter(None, section.split('\n')))[0]]} for section in self.file_data]
 
                 # Load the main data into the file viewer
                 self.txtFileViewer.configure(state = 'normal')
