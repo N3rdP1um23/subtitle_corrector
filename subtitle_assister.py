@@ -1,3 +1,10 @@
+###
+#
+# N3rdP1um23
+# The following file is used to handle modifying and manipulating subtitle files with various actions
+#
+###
+
 # Import the required packages
 import tkinter as tk
 from tkinter import ttk
