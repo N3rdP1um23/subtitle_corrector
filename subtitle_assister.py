@@ -460,6 +460,8 @@ class assister_application:
                 self.file_data = list(filter(None, self.file_data)) # Filter out any empty stings
                 self.file_data = [{'index': section.split('\n')[0], 'time': section.split('\n')[1], 'text': section.split('\n')[2:], 'line_number': line_numbers[section.split('\n')[0]]} for section in self.file_data]
 
+                print(self.file_data[12:14])
+
                 # Load the main data into the file viewer
                 self.txtFileViewer.configure(state = 'normal')
                 self.txtFileViewer.delete(1.0, END)
