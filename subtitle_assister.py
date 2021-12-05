@@ -535,7 +535,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'\ *\-$', line) for line in section['text']):
+                if any(line.endswith('-') for line in section['text'] if line == section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots and a lowercase word':
@@ -676,15 +676,10 @@ class assister_application:
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
             elif current_operation == 'Remove line ending dash':
-                # Search the string
-                results = regex.findall(r'\ *\-$', line)
-
-                # Check to see if the current line is the one that matches
-                if results:
-                    # Iterate over the matches
-                    for match in results:
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, '')
+                # Check to see if the current line is the last line in the section and ends with a dash
+                if line == current_data['text'][-1] and line.endswith('-'):
+                    # Update the strings
+                    current_data['text'][index] = current_data['text'][index][:-1]
             elif current_operation == 'Remove space after three dots and a lowercase word':
                 # Search the string
                 results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
