@@ -29,7 +29,8 @@ class assister_application:
         'Add space after line starting dash',
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and uppercase character',
-        'Capitalize, add a period, and space people abbreviations'
+        'Capitalize, add a period, and space people abbreviations',
+        'Sanitize file'
     ]
     supported_files = (
         ('MicroDVD/VobSub Subtitle File', '*.sub'),
@@ -246,7 +247,10 @@ class assister_application:
         self.btnApproveAll.pack(side = RIGHT, padx = 5)
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkipAll.configure(state = DISABLED)
-        self.btnSkipAll.pack(side = RIGHT, padx = 5)
+        self.btnSkipAll.pack(side = RIGHT)
+        self.btnSaveSanitization = tk.Button(frame, text = 'Save Sanitization', command = self.save_sanitization, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnSaveSanitization.configure(state = DISABLED)
+        self.btnSaveSanitization.pack(side = RIGHT, padx = 5)
 
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
@@ -284,6 +288,11 @@ class assister_application:
             self.btnApprove.configure(state = NORMAL)
             self.btnApproveAll.configure(state = NORMAL)
 
+            # Check if performing the sanitization operation
+            if self.selected_operation.get() == 'Sanitize file':
+                # Enable the save sanitization button
+                self.btnSaveSanitization.configure(state = NORMAL)
+
             # Call the function that's used to handle changing the current file pointer
             self.change_file()
 
@@ -308,6 +317,7 @@ class assister_application:
         self.btnSkipAll.configure(state = DISABLED)
         self.btnApprove.configure(state = DISABLED)
         self.btnApproveAll.configure(state = DISABLED)
+        self.btnSaveSanitization.configure(state = DISABLED)
 
         # Reset the progress bar
         self.pgbQueue['value'] = 0
@@ -383,6 +393,14 @@ class assister_application:
     def approve_all_sections(self):
         # Call the function to handle approving the current section - and passalong that the user wan't to approve all sections
         self.approve_section(approve_all = True)
+
+    # The following function is used to handle approving all sections
+    def save_sanitization(self):
+        # Call the function to handle saving the modifications to the file
+        self.save_modifications()
+
+        # Call the function that's used to handle changing to the next file
+        self.change_file()
 
     ###
     #
@@ -567,6 +585,11 @@ class assister_application:
                 if any(regex.search(r'\.\.\.\ ', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Sanitize file':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Append the section as it needs modification
+                sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -718,6 +741,9 @@ class assister_application:
                     for match in results:
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+            elif current_operation == 'Sanitize file':
+                # Continue as sanatization is already performed
+                continue
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
