@@ -30,7 +30,8 @@ class assister_application:
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and uppercase character',
         'Capitalize, add a period, and space people abbreviations',
-        'Sanitize file'
+        'Sanitize file',
+        'Trim long lines'
     ]
     supported_files = (
         ('MicroDVD/VobSub Subtitle File', '*.sub'),
@@ -590,6 +591,13 @@ class assister_application:
             for section in self.file_data:
                 # Append the section as it needs modification
                 sections_to_modify.append(section)
+        elif current_operation == 'Trim long lines':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(len(line) > 40 for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -744,6 +752,15 @@ class assister_application:
             elif current_operation == 'Sanitize file':
                 # Continue as sanatization is already performed
                 continue
+            elif current_operation == 'Trim long lines':
+                # Store the current line in perfet shape
+                current_line = current_data['text'][index]
+
+                # Double check to make sure the current line is greater than 40 characters
+                if len(current_line) > 40:
+                    # Split the line current line and inser the remaining bak into the array
+                    current_data['text'][index] = ''.join(current_line[:40]).strip()
+                    current_data['text'].insert((index + 1), ''.join(current_line[40:]).strip())
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
