@@ -768,16 +768,12 @@ class assister_application:
 
                     # Double check to make sure the current line is greater than 40 characters
                     if len(current_line) > 40:
-                        # Grab last split value
-                        before_split_value = current_line[39]
-                        split_value = current_line[40]
-                        after_split_value = current_line[41]
+                        # Grab the last space instance
+                        cut_index = 40 - current_line[:40][::-1].index(' ') - 1
 
-                        # Check to see if the split is valid
-                        if split_value == ' ' or after_split_value == ' ':
-                            # Split the line current line and inser the remaining bak into the array
-                            current_data['text'][index] = ''.join(current_line[:40]).strip()
-                            current_data['text'].insert((index + 1), ''.join(current_line[40:]).strip())
+                        # Split the line current line and inser the remaining bak into the array
+                        current_data['text'][index] = ''.join(current_line[:cut_index]).strip()
+                        current_data['text'].insert((index + 1), ''.join(current_line[cut_index:]).strip())
 
                         # Update the further processing flag
                         process_further = True
