@@ -667,100 +667,113 @@ class assister_application:
         # Grab the current operation the user would like to perform
         current_operation = self.selected_operation.get()
 
-        # Grab the text from the current pointer
-        text = current_data['text'].copy()
+        # Create flags to handle iterating over the text based on the current operation
+        first_run = True
+        process_further = False
 
-        # Iterate over the lines and correct the ones with the issue
-        for index, line in enumerate(current_data['text'].copy()):
-            # Check to see if the user is removing uppercase sentances
-            if current_operation == 'Remove full uppercase lines':
-                # Check to see if the current line is the one that matches
-                if line.isupper():
-                    # Zero out the line
-                    current_data['text'].remove(line)
-            elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
-                # Check to see if the current line is the one that matches
-                if regex.search(r'[[:upper:]]{2,}', line):
-                    # Zero out the line
-                    current_data['text'].remove(line)
-            elif current_operation in ['Edit full uppercase lines', 'Edit lines with two or more consecutive uppercase characters']:
-                # Skip iteration as no modifications need to be performed
-                continue
-            elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
-                # Check to see if the current line is the one that matches
-                if (current_operation == 'Add space after line starting dash' and regex.search(r'^(\-\w|\<i\>\-\w|\-\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^(\-[[:lower:]]|\<i\>\-[[:lower:]]|\-\<i\>[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^(\-[[:upper:]]|\<i\>\-[[:upper:]]|\-\<i\>[[:upper:]])', line)):
-                    # Check to see if the line contains a text modifier
-                    if regex.search(r'\<i\>', line):
-                        # Check to see if the line starts with with the text modifier
-                        if line.startswith('<i>'):
-                            # Correct the dash with no space
-                            current_data['text'][index] = '<i>- ' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
+        # Iterate only when it's the first run or further processing is needed
+        while first_run or process_further:
+            # Update the flags
+            first_run = False
+            process_further = False
+
+            # Grab the text from the current pointer
+            text = current_data['text'].copy()
+
+            # Iterate over the lines and correct the ones with the issue
+            for index, line in enumerate(current_data['text'].copy()):
+                # Check to see if the user is removing uppercase sentances
+                if current_operation == 'Remove full uppercase lines':
+                    # Check to see if the current line is the one that matches
+                    if line.isupper():
+                        # Zero out the line
+                        current_data['text'].remove(line)
+                elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
+                    # Check to see if the current line is the one that matches
+                    if regex.search(r'[[:upper:]]{2,}', line):
+                        # Zero out the line
+                        current_data['text'].remove(line)
+                elif current_operation in ['Edit full uppercase lines', 'Edit lines with two or more consecutive uppercase characters']:
+                    # Skip iteration as no modifications need to be performed
+                    continue
+                elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
+                    # Check to see if the current line is the one that matches
+                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^(\-\w|\<i\>\-\w|\-\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^(\-[[:lower:]]|\<i\>\-[[:lower:]]|\-\<i\>[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^(\-[[:upper:]]|\<i\>\-[[:upper:]]|\-\<i\>[[:upper:]])', line)):
+                        # Check to see if the line contains a text modifier
+                        if regex.search(r'\<i\>', line):
+                            # Check to see if the line starts with with the text modifier
+                            if line.startswith('<i>'):
+                                # Correct the dash with no space
+                                current_data['text'][index] = '<i>- ' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
+                            else:
+                                # Correct the dash with no space
+                                current_data['text'][index] = '- <i>' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
                         else:
                             # Correct the dash with no space
-                            current_data['text'][index] = '- <i>' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
-                    else:
-                        # Correct the dash with no space
-                        current_data['text'][index] = '- ' + current_data['text'][index][1:]
-            elif current_operation == 'Capitalize, add a period, and space people abbreviations':
-                # Search the string
-                results = regex.findall(r'(?:^|\ )(dr(?:\ |\.|\.\ )|Dr|(?:\ |\.)jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[[:upper:]]', line)
+                            current_data['text'][index] = '- ' + current_data['text'][index][1:]
+                elif current_operation == 'Capitalize, add a period, and space people abbreviations':
+                    # Search the string
+                    results = regex.findall(r'(?:^|\ )(dr(?:\ |\.|\.\ )|Dr|(?:\ |\.)jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[[:upper:]]', line)
 
-                # Check to see if the current line is the one that matches
-                if results:
-                    # Iterate over the matches
-                    for match in results:
-                        # Update the match
-                        match = ''.join(match)
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the match
+                            match = ''.join(match)
 
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
+                elif current_operation == 'Remove line ending dash':
+                    # Check to see if the current line is the last line in the section and ends with a dash
+                    if line == current_data['text'][-1] and line.endswith('-'):
                         # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
-            elif current_operation == 'Remove line ending dash':
-                # Check to see if the current line is the last line in the section and ends with a dash
-                if line == current_data['text'][-1] and line.endswith('-'):
-                    # Update the strings
-                    current_data['text'][index] = current_data['text'][index][:-1]
-            elif current_operation == 'Remove space after three dots and a lowercase word':
-                # Search the string
-                results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
+                        current_data['text'][index] = current_data['text'][index][:-1]
+                elif current_operation == 'Remove space after three dots and a lowercase word':
+                    # Search the string
+                    results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
 
-                # Check to see if the current line is the one that matches
-                if results:
-                    # Iterate over the matches
-                    for match in results:
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-            elif current_operation == 'Remove space after three dots and an uppercase word':
-                # Search the string
-                results = regex.findall(r'\.\.\.\ [[:upper:]]', line)
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+                elif current_operation == 'Remove space after three dots and an uppercase word':
+                    # Search the string
+                    results = regex.findall(r'\.\.\.\ [[:upper:]]', line)
 
-                # Check to see if the current line is the one that matches
-                if results:
-                    # Iterate over the matches
-                    for match in results:
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-            elif current_operation == 'Remove space after three dots':
-                # Search the string
-                results = regex.findall(r'\.\.\.\ ', line)
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+                elif current_operation == 'Remove space after three dots':
+                    # Search the string
+                    results = regex.findall(r'\.\.\.\ ', line)
 
-                # Check to see if the current line is the one that matches
-                if results:
-                    # Iterate over the matches
-                    for match in results:
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-            elif current_operation == 'Sanitize file':
-                # Continue as sanatization is already performed
-                continue
-            elif current_operation == 'Trim long lines':
-                # Store the current line in perfet shape
-                current_line = current_data['text'][index]
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+                elif current_operation == 'Sanitize file':
+                    # Continue as sanatization is already performed
+                    continue
+                elif current_operation == 'Trim long lines':
+                    # Store the current line in perfet shape
+                    current_line = current_data['text'][index]
 
-                # Double check to make sure the current line is greater than 40 characters
-                if len(current_line) > 40:
-                    # Split the line current line and inser the remaining bak into the array
-                    current_data['text'][index] = ''.join(current_line[:40]).strip()
-                    current_data['text'].insert((index + 1), ''.join(current_line[40:]).strip())
+                    # Double check to make sure the current line is greater than 40 characters
+                    if len(current_line) > 40:
+                        # Split the line current line and inser the remaining bak into the array
+                        current_data['text'][index] = ''.join(current_line[:40]).strip()
+                        current_data['text'].insert((index + 1), ''.join(current_line[40:]).strip())
+
+                        # Update the further processing flag
+                        process_further = True
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
