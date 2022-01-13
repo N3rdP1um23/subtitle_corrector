@@ -31,6 +31,7 @@ class assister_application:
         'Add space after line starting dash and uppercase character',
         'Capitalize, add a period, and space people abbreviations',
         'Sanitize file',
+        'Convert vtt to srt',
         'Trim long lines'
     ]
     supported_files = (
@@ -469,6 +470,9 @@ class assister_application:
             # Return False as the file wasn't found
             return False
         else:
+            # Grab the current operation the user would like to perform
+            current_operation = self.selected_operation.get()
+
             # Load the file contents
             with open(file, 'r', encoding = 'utf-8-sig') as file:
                 # Create a dictionary that holds the line number and line number
@@ -476,6 +480,11 @@ class assister_application:
 
                 # Seek back to the start of the file
                 file.seek(0)
+
+                # Check to see if converting a vtt to srt file
+                if current_operation == 'Convert vtt to srt':
+                    # Skip the first three lines of the file as they're header information
+                    file.seek(sum([len(line) for line in file.readlines()[0:3]]))
 
                 # Grab the file content
                 file_content = file.read()
@@ -485,7 +494,9 @@ class assister_application:
                 self.file_data = [x for x in self.file_data if x != '\n' and x != '\n\n'] # Filter out any remaining new lines or double new lines
                 self.file_data = list(filter(None, self.file_data)) # Filter out any empty stings
                 self.file_data = [x for x in self.file_data if len(list(filter(None, x.split('\n')))) >= 3] # Filter out any lines that have no text
-                self.file_data = [{'index': list(filter(None, section.split('\n')))[0], 'time': list(filter(None, section.split('\n')))[1], 'text': list(filter(None, section.split('\n')))[2:], 'line_number': line_numbers[list(filter(None, section.split('\n')))[0]]} for section in self.file_data]
+                has_index = list(filter(None, self.file_data[0].split('\n')))[0].isnumeric()
+                index = 0
+                self.file_data = [{'index': list(filter(None, section.split('\n')))[0] if has_index else str(index := index + 1), 'time': list(filter(None, section.split('\n')))[1 if has_index else 0], 'text': list(filter(None, section.split('\n')))[2:] if has_index else list(filter(None, section.split('\n')))[1:], 'line_number': line_numbers[list(filter(None, section.split('\n')))[0]] if has_index else index} for section in self.file_data]
 
                 # Load the main data into the file viewer
                 self.txtFileViewer.configure(state = 'normal')
@@ -598,6 +609,11 @@ class assister_application:
                 if any(len(line) > 40 for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Convert vtt to srt':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Append the section to the list that will hold the sections that need correcting
+                sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -677,8 +693,14 @@ class assister_application:
             first_run = False
             process_further = False
 
-            # Grab the text from the current pointer
+            # Grab the time and text from the current pointer
+            time = ('%s' % current_data['time'])
             text = current_data['text'].copy()
+
+            # Check to see if the user is performing a function to handle converting the file from vtt to srt
+            if current_operation == 'Convert vtt to srt':
+                # Update the time setting
+                current_data['time'] = ' '.join(current_data['time'].split(' ', 3)[:-1])
 
             # Iterate over the lines and correct the ones with the issue
             for index, line in enumerate(current_data['text'].copy()):
@@ -784,13 +806,25 @@ class assister_application:
         self.txtNewSection.insert(END, current_data['index'] + '\n' + current_data['time'] + '\n' + '\n'.join(current_data['text']))
         self.txtNewSection.configure(state = 'disabled')
 
-        # Update the current pointer and reset the text entry
+        # Update the current pointer and reset the time and text entry
+        current_data['time'] = time
         current_data['text'] = text
 
     # The following function is used to handle saving the modifications to file
     def save_modifications(self):
+        # Grab the current operation the user would like to perform
+        current_operation = self.selected_operation.get()
+
+        # Create a variable that holds the full file path
+        file_path = self.selected_files[self.current_file_index]
+
+        # Check to see if the user desires to convert the file
+        if current_operation == 'Convert vtt to srt':
+            # Change the file extension
+            file_path = file_path.replace('vtt', 'str')
+
         # Open the file in question and save the modifications
-        with open(self.selected_files[self.current_file_index], 'w', encoding = 'utf-8') as file:
+        with open(file_path, 'w', encoding = 'utf-8') as file:
             # Create a list holding modified file sections
             modified_sections = []
 
