@@ -606,7 +606,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(len(line) > 40 for line in section['text']):
+                if any(len(line) > 45 for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Convert vtt to srt':
@@ -686,6 +686,8 @@ class assister_application:
         # Create flags to handle iterating over the text based on the current operation
         first_run = True
         process_further = False
+
+        # Add `process_further = True` to any function that needs to be scanned after changes
 
         # Iterate only when it's the first run or further processing is needed
         while first_run or process_further:
@@ -788,17 +790,17 @@ class assister_application:
                     # Store the current line in perfet shape
                     current_line = current_data['text'][index]
 
-                    # Double check to make sure the current line is greater than 40 characters
-                    if len(current_line) > 40:
-                        # Grab the last space instance
-                        cut_index = 40 - current_line[:40][::-1].index(' ') - 1
+                    # Double check to make sure the current line is greater than 45 characters
+                    if len(current_line) > 45:
+                        # Convert the string to an array split by the spaces
+                        current_line = current_line.split(' ')
+
+                        # Grab the middle of the sentance (based on arrayed (split sentance by space) index middle point)
+                        split_index = ((len(current_line) // 2) if (len(current_line) // 2) % 2 == 0 else ((len(current_line) // 2) + 1))
 
                         # Split the line current line and inser the remaining bak into the array
-                        current_data['text'][index] = ''.join(current_line[:cut_index]).strip()
-                        current_data['text'].insert((index + 1), ''.join(current_line[cut_index:]).strip())
-
-                        # Update the further processing flag
-                        process_further = True
+                        current_data['text'][index] = ' '.join(current_line[:split_index]).strip()
+                        current_data['text'].insert((index + 1), ' '.join(current_line[split_index:]).strip())
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
