@@ -606,7 +606,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(len(line) > 45 for line in section['text']):
+                if (any(len(line) > 45 for line in section['text']) and not any(line.startswith('- ') for line in section['text'])) or (any(regex.search(r'-\ .+(?|!|.|)\ -\ .*', line) for line in section['text'])):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Convert vtt to srt':
@@ -790,8 +790,14 @@ class assister_application:
                     # Store the current line in perfet shape
                     current_line = current_data['text'][index]
 
+                    # Check to see if the current line has more than one speaker
+                    has_multiple_speakers = regex.findall(r'-\ .+(?|!|.|)\ -\ .*', current_line)
+
+                    print(has_multiple_speakers)
+                    exit()
+
                     # Double check to make sure the current line is greater than 45 characters
-                    if len(current_line) > 45:
+                    if (len(current_line) > 45 and not current_line.startswith('- ')) or (has_multiple_speakers):
                         # Convert the string to an array split by the spaces
                         current_line = current_line.split(' ')
 
