@@ -566,7 +566,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'(dr(?:\ |\.|\.\ )|Dr(?:\ |\.|\.\ )|jr(?:\ |\.|\.\ )|Jr(?:\ |\.|\.\ )|mr(?:\ |\.|\.\ )|Mr(?:\ |\.|\.\ )|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.|\.\ )|ms(?:\ |\.|\.\ )|Ms(?:\ |\.|\.\ )|sr(?:\ |\.|\.\ )|Sr(?:\ |\.|\.\ )|st(?:\ |\.|\.\ )|St(?:\ |\.|\.\ ))[[:upper:]]', line) for line in section['text']):
+                if any(regex.search(r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[[:upper:]]', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove line ending dash':
@@ -735,7 +735,7 @@ class assister_application:
                             current_data['text'][index] = '- ' + current_data['text'][index][1:]
                 elif current_operation == 'Capitalize, add a period, and space people abbreviations':
                     # Search the string
-                    results = regex.findall(r'(dr(?:\ |\.|\.\ )|Dr(?:\ |\.|\.\ )|jr(?:\ |\.|\.\ )|Jr(?:\ |\.|\.\ )|mr(?:\ |\.|\.\ )|Mr(?:\ |\.|\.\ )|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.|\.\ )|ms(?:\ |\.|\.\ )|Ms(?:\ |\.|\.\ )|sr(?:\ |\.|\.\ )|Sr(?:\ |\.|\.\ )|st(?:\ |\.|\.\ )|St(?:\ |\.|\.\ ))[[:upper:]]', line)
+                    results = regex.findall(r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[[:upper:]]', line)
 
                     # Check to see if the current line is the one that matches
                     if results:
