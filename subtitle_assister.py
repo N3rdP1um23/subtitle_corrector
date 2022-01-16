@@ -6,6 +6,7 @@
 ###
 
 # Import the required packages
+from signal import SIG_DFL
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
@@ -545,21 +546,21 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'^(\-\w|\<i\>\-\w|\-\<i\>\w)', line) for line in section['text']):
+                if any(regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and lowercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'^(\-[[:lower:]]|\<i\>\-[[:lower:]]|\-\<i\>[[:lower:]])', line) for line in section['text']):
+                if any(regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]])', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and uppercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'^(\-[[:upper:]]|\<i\>\-[[:upper:]]|\-\<i\>[[:upper:]])', line) for line in section['text']):
+                if any(regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]])', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Capitalize, add a period, and space people abbreviations':
@@ -606,7 +607,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if (any(len(line) > 45 for line in section['text']) and not any(line.startswith('- ') for line in section['text'])) or (any(regex.search(r'-\ .+(?|!|.|)\ -\ .*', line) for line in section['text'])):
+                if (any(len(line) > 45 for line in section['text']) and not any(line.startswith('- ') for line in section['text'])) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line in section['text'])):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Convert vtt to srt':
@@ -722,7 +723,7 @@ class assister_application:
                     continue
                 elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
                     # Check to see if the current line is the one that matches
-                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^(\-\w|\<i\>\-\w|\-\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^(\-[[:lower:]]|\<i\>\-[[:lower:]]|\-\<i\>[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^(\-[[:upper:]]|\<i\>\-[[:upper:]]|\-\<i\>[[:upper:]])', line)):
+                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]])', line)):
                         # Check to see if the line contains a text modifier
                         if regex.search(r'\<i\>', line):
                             # Check to see if the line starts with with the text modifier
@@ -791,22 +792,34 @@ class assister_application:
                     current_line = current_data['text'][index]
 
                     # Check to see if the current line has more than one speaker
-                    has_multiple_speakers = regex.findall(r'-\ .+(?|!|.|)\ -\ .*', current_line)
+                    has_multiple_speakers = regex.findall(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', current_line)
 
-                    print(has_multiple_speakers)
-                    exit()
+                    # Double check to make sure the current line is greater than 45 characters and doesn't start with a dash or has multiple speakers
+                    if (len(current_line) > 45 and not current_line.startswith('- ')) or has_multiple_speakers:
+                        # Check to see if handling for more than one speaker
+                        if has_multiple_speakers:
+                            # # Iterate over the matches and insert them correctly
+                            for  matched_group_index, matched_group_text in enumerate(has_multiple_speakers[0], 0):
+                                # Check to see if the index exists
+                                if (index + matched_group_index) < len(current_data['text']):
+                                    # Update the current index pointer with the matched string
+                                    current_data['text'][index + matched_group_index] = matched_group_text
+                                else:
+                                    # Insert the current index pointer with the matched string
+                                    current_data['text'].insert((index + matched_group_index), matched_group_text)
+                        else:
+                            # Convert the string to an array split by the spaces
+                            current_line = current_line.split(' ')
 
-                    # Double check to make sure the current line is greater than 45 characters
-                    if (len(current_line) > 45 and not current_line.startswith('- ')) or (has_multiple_speakers):
-                        # Convert the string to an array split by the spaces
-                        current_line = current_line.split(' ')
+                            # Grab the middle of the sentance (based on arrayed (split sentance by space) index middle point)
+                            split_index = ((len(current_line) // 2) if (len(current_line) // 2) % 2 == 0 else ((len(current_line) // 2) + 1))
 
-                        # Grab the middle of the sentance (based on arrayed (split sentance by space) index middle point)
-                        split_index = ((len(current_line) // 2) if (len(current_line) // 2) % 2 == 0 else ((len(current_line) // 2) + 1))
+                            # Split the line current line and inser the remaining bak into the array
+                            current_data['text'][index] = ' '.join(current_line[:split_index]).strip()
+                            current_data['text'].insert((index + 1), ' '.join(current_line[split_index:]).strip())
 
-                        # Split the line current line and inser the remaining bak into the array
-                        current_data['text'][index] = ' '.join(current_line[:split_index]).strip()
-                        current_data['text'].insert((index + 1), ' '.join(current_line[split_index:]).strip())
+                        # Send the section to be further processed
+                        process_further = True
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
