@@ -35,8 +35,8 @@ class assister_application:
         'Trim long lines'
     ]
     supported_files = (
-        ('MicroDVD/VobSub Subtitle File', '*.sub'),
         ('SubRip File', '*.srt'),
+        ('MicroDVD/VobSub Subtitle File', '*.sub'),
         ('Sub Station Alpha Subtitle File', '*.ssa'),
         ('Text File', '*.txt'),
         ('Web Video Text Tracks File', '*.vtt'),
