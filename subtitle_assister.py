@@ -694,11 +694,19 @@ class assister_application:
         time = ('%s' % current_data['time'])
         text = current_data['text'].copy()
 
+        # Store which line should be processed next
+        process_line_index = 0
+
         # Iterate only when it's the first run or further processing is needed
         while first_run or process_further:
             # Update the flags
             first_run = False
             process_further = False
+
+            # Check to see if the next line can be processed
+            if process_line_index >= len(current_data['text']):
+                # Break out of the loop
+                break
 
             # Check to see if the user is performing a function to handle converting the file from vtt to srt
             if current_operation == 'Convert vtt to srt':
@@ -706,7 +714,7 @@ class assister_application:
                 current_data['time'] = ' '.join(current_data['time'].split(' ', 3)[:-1])
 
             # Iterate over the lines and correct the ones with the issue
-            for index, line in enumerate(current_data['text'].copy()):
+            for index, line in enumerate(current_data['text'][process_line_index:].copy(), process_line_index):
                 # Check to see if the user is removing uppercase sentances
                 if current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
@@ -820,6 +828,9 @@ class assister_application:
 
                         # Send the section to be further processed
                         process_further = True
+
+                        # Skip over the current line pointer and two lines that have just been modified
+                        process_line_index = process_line_index + 2
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
