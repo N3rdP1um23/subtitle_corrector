@@ -671,7 +671,8 @@ class assister_application:
 
     # The following function is used to handle highlighting text and scrolling to it if it's out of view
     def highlight_and_view(self, line_start, line_end):
-        # Highlight the text in question
+        # Remove the highlight tag up to the next processing section and then highlight the text in question
+        self.txtFileViewer.tag_remove('highlight', "%s.0" % 0, "%s.0" % line_start)
         self.txtFileViewer.tag_add('highlight', "%s.0" % line_start, "%s.0" % line_end)
 
         # Scroll to the text in question
