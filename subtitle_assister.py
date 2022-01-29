@@ -267,7 +267,7 @@ class assister_application:
     # The following function is used to handle gathering the files to add to the queue
     def gather_subtitle_file(self):
         # Ask the user to select a file(s)
-        self.selected_files = fd.askopenfilenames(title = 'Open Subtitle File(s)', initialdir = '/', filetypes = self.supported_files)
+        self.selected_files = fd.askopenfilenames(title = 'Open Subtitle File(s)', filetypes = self.supported_files)
 
         # Iterare over the selected files and append them to the queue
         for file_name in self.selected_files:
