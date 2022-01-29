@@ -690,15 +690,15 @@ class assister_application:
 
         # Add `process_further = True` to any function that needs to be scanned after changes
 
+        # Grab the initial time and text information
+        time = ('%s' % current_data['time'])
+        text = current_data['text'].copy()
+
         # Iterate only when it's the first run or further processing is needed
         while first_run or process_further:
             # Update the flags
             first_run = False
             process_further = False
-
-            # Grab the time and text from the current pointer
-            time = ('%s' % current_data['time'])
-            text = current_data['text'].copy()
 
             # Check to see if the user is performing a function to handle converting the file from vtt to srt
             if current_operation == 'Convert vtt to srt':
