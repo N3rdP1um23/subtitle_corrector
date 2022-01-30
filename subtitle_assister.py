@@ -30,11 +30,15 @@ class assister_application:
         'Add space after line starting dash',
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and uppercase character',
+        'Add dashes to split lines',
         'Capitalize, add a period, and space people abbreviations',
         'Sanitize file',
         'Convert vtt to srt',
         'Trim long lines'
     ]
+    section_spanning_operations = { # Operations that span more than one section and their respective sections they span
+        'Add dashes to split lines': 2
+    }
     supported_files = (
         ('SubRip File', '*.srt'),
         ('MicroDVD/VobSub Subtitle File', '*.sub'),
@@ -369,22 +373,56 @@ class assister_application:
 
     # The following function is used to handle approving the current section
     def approve_section(self, approve_all = False):
+        # Grab the current operation the user would like to perform
+        current_operation = self.selected_operation.get()
+
         # Grab the current modifications
         current_modifications = self.txtNewSection.get('1.0', END)
-        current_modifications = current_modifications.split('\n')
-        current_modifications = [x for x in current_modifications if x != '\n' and x != '\n\n']
-        current_modifications = list(filter(None, current_modifications))
-        current_modifications = {'index': current_modifications[0], 'time': current_modifications[1], 'text': current_modifications[2:]}
 
-        # Grab the current file_data index and update the text section with the new edits
-        current_line_index = self.sections_to_modify[self.current_index - 1]['index']
-        current_section = [section for section in self.file_data if section['index'] == current_line_index][0]
-        current_section['text'] = current_modifications['text']
+        # Check to see if the current operation is a section spanner
+        if current_operation in self.section_spanning_operations.keys():
+            # Break the spanning sections
+            sectional_modifications = current_modifications.split('\n\n')
 
-        # Check to see if the section ends up blank
-        if len(current_section['text']) == 0:
-            # Remove the current section
-            self.file_data = [section for section in self.file_data if section['index'] != current_line_index]
+            # Reset the current index
+            section_index = self.current_index - self.section_spanning_operations[current_operation]
+
+            # Iterate over each of the sections and handle accordingly
+            for section in sectional_modifications:
+                # Handle further modifications to the current modified section
+                current_modifications = section.split('\n')
+                current_modifications = [x for x in current_modifications if x != '\n' and x != '\n\n']
+                current_modifications = list(filter(None, current_modifications))
+                current_modifications = {'index': current_modifications[0], 'time': current_modifications[1], 'text': current_modifications[2:]}
+
+                # Grab the current file_data index and update the text section with the new edits
+                current_line_index = self.sections_to_modify[section_index]['index']
+                current_section = [section for section in self.file_data if section['index'] == current_line_index][0]
+                current_section['text'] = current_modifications['text']
+
+                # Check to see if the section ends up blank
+                if len(current_section['text']) == 0:
+                    # Remove the current section
+                    self.file_data = [section for section in self.file_data if section['index'] != current_line_index]
+
+                # Increment the section index pointer
+                section_index = section_index + 1
+        else:
+            # Handle further modifications to the current modifications pointer
+            current_modifications = current_modifications.split('\n')
+            current_modifications = [x for x in current_modifications if x != '\n' and x != '\n\n']
+            current_modifications = list(filter(None, current_modifications))
+            current_modifications = {'index': current_modifications[0], 'time': current_modifications[1], 'text': current_modifications[2:]}
+
+            # Grab the current file_data index and update the text section with the new edits
+            current_line_index = self.sections_to_modify[self.current_index - 1]['index']
+            current_section = [section for section in self.file_data if section['index'] == current_line_index][0]
+            current_section['text'] = current_modifications['text']
+
+            # Check to see if the section ends up blank
+            if len(current_section['text']) == 0:
+                # Remove the current section
+                self.file_data = [section for section in self.file_data if section['index'] != current_line_index]
 
         # Correct the new section text area to not be editable
         self.edit_new_section(disabled = True)
@@ -615,6 +653,14 @@ class assister_application:
             for section in self.file_data:
                 # Append the section to the list that will hold the sections that need correcting
                 sections_to_modify.append(section)
+        elif current_operation == 'Add dashes to split lines':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if this section isn't the last section and needs handling
+                if not section_index == (len(self.file_data) - 1) and regex.search(r'[a-z]$', section_data['text'][-1].strip()) and regex.search(r'^[a-z]', self.file_data[section_index + 1]['text'][0].strip()):
+                    # Append the sections to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section_data)
+                    sections_to_modify.append(self.file_data[section_index + 1])
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -625,6 +671,9 @@ class assister_application:
 
     # The following function is used to handle setting up the data to have changes confirmed and modified if needed
     def setup_data(self, approve_all = False):
+        # Grab the current operation the user would like to perform
+        current_operation = self.selected_operation.get()
+
         # Check to see if the file has been fully modified
         if self.current_index >= len(self.sections_to_modify):
             # Call the function to handle saving the modifications to the file
@@ -636,33 +685,56 @@ class assister_application:
             # Return to stop further processing
             return
 
-        # Grab the current data to handle
+        # Grab the current and next data data to handle
         current_data = self.sections_to_modify[self.current_index]
+        next_data = self.sections_to_modify[self.current_index + 1] if current_operation in self.section_spanning_operations.keys() else None
+
+        # Calculate the ending index to highlight
+        highlight_end_index = ((next_data['line_number'] + (len(next_data) - 2) + len(next_data['text']))) if current_operation in self.section_spanning_operations.keys() and not next_data == None else (current_data['line_number'] + (len(current_data) - 2) + len(current_data['text']))
 
         # Call the function to handle highlighting the text and scrolling to it if need be
-        self.highlight_and_view(current_data['line_number'], (current_data['line_number'] + (len(current_data) - 2) + len(current_data['text'])))
+        self.highlight_and_view(current_data['line_number'], highlight_end_index)
 
         # Remove the line_number from the data array
         current_data.pop('line_number')
 
+        # Create a variable that will store the next_data's line number
+        next_data_line_number = None
+
         # Update the current_data's text to be joined
         current_data['text'] = '\n'.join(current_data['text'])
+
+        # Check to see if using an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys():
+            # Remove the line number from the dictionary
+            next_data_line_number = next_data.pop('line_number')
+
+            # Update the following sections text to be joined
+            next_data['text'] = '\n'.join(next_data['text'])
 
         # Load the section into the old viewer
         self.txtOldSection.configure(state = 'normal')
         self.txtOldSection.delete(1.0, END)
-        self.txtOldSection.insert(END, '\n'.join(current_data.values()))
+        self.txtOldSection.insert(END, '\n'.join(current_data.values()) + '\n\n' + '\n'.join(next_data.values()) if current_operation in self.section_spanning_operations.keys() else '\n'.join(current_data.values()))
         self.txtOldSection.configure(state = 'disabled')
 
         # Update the current_data's text to be in a list again
         current_data['text'] = current_data['text'].split('\n')
 
+        # Check to see if using an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys():
+            # Update the next_data's text to be in a list again
+            next_data['text'] = next_data['text'].split('\n')
+
         # Call the function that handles modifying the data and displays it in view
-        self.modify_section(current_data)
+        self.modify_section(current_data, next_data)
 
         # Update current match pointer and label
-        self.current_index = self.current_index + 1
-        self.lblCurrentMatch['text'] = str(self.current_index)
+        self.current_index = self.current_index + 1 if current_operation not in self.section_spanning_operations.keys() else self.current_index + self.section_spanning_operations[current_operation]
+        self.lblCurrentMatch['text'] = str(int(self.current_index))
+
+        # Add back on the line number for the next section
+        next_data['line_number'] = next_data_line_number
 
         # Check to see if use has approved all sections
         if approve_all == True:
@@ -681,7 +753,7 @@ class assister_application:
         self.txtFileViewer.yview_scroll(lineinfo[1], 'pixels' )
 
     # The following function is used to handle modifying the data and displaying it in view
-    def modify_section(self, current_data):
+    def modify_section(self, current_data, next_data = None):
         # Grab the current operation the user would like to perform
         current_operation = self.selected_operation.get()
 
@@ -689,15 +761,20 @@ class assister_application:
         first_run = True
         process_further = False
 
-        # Add `process_further = True` to any function that needs to be scanned after changes
+        # Grab the initial time and text information of the current section data
+        current_time = ('%s' % current_data['time'])
+        current_text = current_data['text'].copy()
 
-        # Grab the initial time and text information
-        time = ('%s' % current_data['time'])
-        text = current_data['text'].copy()
+        # Check to see if performing an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys() and not next_data == None:
+            # Grab the initial time and text information of the next section data
+            next_time = ('%s' % next_data['time'])
+            next_text = next_data['text'].copy()
 
         # Store which line should be processed next
         process_line_index = 0
 
+        # Add `process_further = True` to any function that needs to be scanned after changes
         # Iterate only when it's the first run or further processing is needed
         while first_run or process_further:
             # Update the flags
@@ -832,16 +909,38 @@ class assister_application:
 
                         # Skip over the current line pointer and two lines that have just been modified
                         process_line_index = process_line_index + 2
+                elif current_operation == 'Add dashes to split lines':
+                    # Check to see if the current line pointer is the last line in the text array
+                    if index == (len(current_data['text']) - 1):
+                        # Validate that the last line and the start of the next line are ready for modification
+                        if regex.search(r'[a-z]$', line.strip()) and regex.search(r'^[a-z]', next_data['text'][0].strip()):
+                            # Add the appropriate dashes to the current and next sections
+                            current_data['text'][index] = line + '-'
+                            next_data['text'][0] = '-' + next_data['text'][0]
+
+        # Update the current_data's text to be joined
+        current_data['text'] = '\n'.join(current_data['text'])
+
+        # Check to see if using an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys():
+            # Update the following sections text to be joined
+            next_data['text'] = '\n'.join(next_data['text'])
 
         # Load the modified section into the new viewer
         self.txtNewSection.configure(state = 'normal')
         self.txtNewSection.delete(1.0, END)
-        self.txtNewSection.insert(END, current_data['index'] + '\n' + current_data['time'] + '\n' + '\n'.join(current_data['text']))
+        self.txtNewSection.insert(END, '\n'.join(current_data.values()) + '\n\n' + '\n'.join(next_data.values()) if current_operation in self.section_spanning_operations.keys() else '\n'.join(current_data.values()))
         self.txtNewSection.configure(state = 'disabled')
 
         # Update the current pointer and reset the time and text entry
-        current_data['time'] = time
-        current_data['text'] = text
+        current_data['time'] = current_time
+        current_data['text'] = current_text
+
+        # Check to see if performing an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys() and not next_data == None:
+            # Update the next pointer and reset the time and text entry
+            next_data['time'] = next_time
+            next_data['text'] = next_text
 
     # The following function is used to handle saving the modifications to file
     def save_modifications(self):
@@ -869,5 +968,5 @@ class assister_application:
             # Write the modified sections to the file
             file.write('\n\n'.join(modified_sections).encode('utf-8', 'ignore').decode('utf-8'))
 
-# Call the main
+# Call the main function to start the application
 assister_application().display()
