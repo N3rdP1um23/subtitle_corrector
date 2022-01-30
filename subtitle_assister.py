@@ -22,6 +22,7 @@ class assister_application:
         'Remove full uppercase lines',
         'Remove lines with two or more consecutive uppercase characters',
         'Remove line ending dash',
+        'Remove spaced line ending dash',
         'Remove space after three dots and a lowercase word',
         'Remove space after three dots and an uppercase word',
         'Remove space after three dots',
@@ -617,6 +618,13 @@ class assister_application:
                 if any(line.endswith('-') for line in section['text'] if line == section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Remove spaced line ending dash':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(line.endswith(' -') for line in section['text'] if line == section['text'][-1]):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots and a lowercase word':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -850,6 +858,11 @@ class assister_application:
                     if line == current_data['text'][-1] and line.endswith('-'):
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index][:-1]
+                elif current_operation == 'Remove spaced line ending dash':
+                    # Check to see if the current line is the last line in the section and ends with a dash
+                    if line == current_data['text'][-1] and line.endswith(' -'):
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index][:-2] + '-'
                 elif current_operation == 'Remove space after three dots and a lowercase word':
                     # Search the string
                     results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
