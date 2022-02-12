@@ -667,7 +667,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and regex.search(r'[a-z]$', section_data['text'][-1].strip()) and regex.search(r'^[a-z]', self.file_data[section_index + 1]['text'][0].strip()):
+                if not section_index == (len(self.file_data) - 1) and regex.search(r'(\w|-)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|-)', self.file_data[section_index + 1]['text'][0].strip()):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -675,7 +675,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and regex.search(r'\ (\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^\-|\–\ ', self.file_data[section_index + 1]['text'][0].strip()):
+                if not section_index == (len(self.file_data) - 1) and (regex.search(r'\ (\-|\–)$', section_data['text'][-1].strip()) or regex.search(r'^(\-|\–)\ ', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -934,16 +934,22 @@ class assister_application:
                         process_line_index = process_line_index + 2
                 elif current_operation == 'Add dashes to split lines':
                     # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
-                    if index == (len(current_data['text']) - 1) and regex.search(r'[a-z]$', line.strip()) and regex.search(r'^[a-z]', next_data['text'][0].strip()):
+                    if index == (len(current_data['text']) - 1) and regex.search(r'(\w|-)$', line.strip()) and regex.search(r'^(\w|-)', next_data['text'][0].strip()):
                         # Add the appropriate dashes to the current and next sections
-                        current_data['text'][index] = line + '-'
-                        next_data['text'][0] = '-' + next_data['text'][0]
+                        current_data['text'][index] = line + ('-' if not line.endswith('-') else '')
+                        next_data['text'][0] = ('-' if not next_data['text'][0].startswith('-') else '') + next_data['text'][0]
                 elif current_operation == 'Remove spaced dashes from split lines':
-                    # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
-                    if index == (len(current_data['text']) - 1) and regex.search(r'\ (\-|\–)$', line.strip()) and regex.search(r'^\-|\–\ ', next_data['text'][0].strip()):
-                        # Add the appropriate dashes to the current and next sections
-                        current_data['text'][index] = line[:-2] + '-'
-                        next_data['text'][0] = '-' + next_data['text'][0][2:]
+                    # Check to see if the current line pointer is the last line in the text array
+                    if index == (len(current_data['text']) - 1):
+                        # Check to see if the correction should be applied to the iterated line
+                        if regex.search(r'\ (\-|\–)$', line.strip()):
+                            # Correct the dash position
+                            current_data['text'][index] = line[:-2] + '-'
+
+                        # Check to see if the correction should be applied to the next section line
+                        if regex.search(r'^(\-|\–)\ ', next_data['text'][0].strip()):
+                            # Correct the dash position
+                            next_data['text'][0] = '-' + next_data['text'][0][2:]
 
         # Update the current_data's text to be joined
         current_data['text'] = '\n'.join(current_data['text'])
