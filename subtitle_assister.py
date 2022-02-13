@@ -955,8 +955,26 @@ class assister_application:
                 elif current_operation == 'Add dashes to split lines':
                     # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
                     if index == (len(current_data['text']) - 1) and not (regex.search(r'(\-|\–)$', line.strip()) and regex.search(r'^(\-|\–)', next_data['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', line.strip()) and regex.search(r'^(\w|\"\w|\-|\–)', next_data['text'][0].strip())):
-                        # Add the appropriate dashes to the current and next sections
-                        current_data['text'][index] = line + ('-' if not regex.search(r'(\-|\–)$', line) else '')
+                        # Check to see if the first sections line has a dash
+                        if regex.search(r'(\-|\–)$', line.strip()):
+                            # Check to see if the respective line has a spaced dash
+                            if regex.search(r'\ (\-|\–)$', line.strip()):
+                                # Remove the spaced dash from the line
+                                current_data['text'][index] = line.strip()[:-2] + '-'
+                        else:
+                            # Add the dash to the current line in the correct location
+                            current_data['text'][index] = line.strip() + '-'
+
+                        # Check to see if the following sections line has a dash
+                        if regex.search(r'^(\-|\–)', next_data['text'][0].strip()):
+                            # Check to see if the respective line has a spaced dash
+                            if regex.search(r'^(\-|\–)\ ', next_data['text'][0].strip()):
+                                # Remove the spaced dash from the line
+                                next_data['text'][0] = '-' + next_data['text'][0].strip()[2:]
+                        else:
+                            # Add the dash to the current line in the correct location
+                            next_data['text'][0] = '-' + next_data['text'][0].strip()
+
                         next_data['text'][0] = ('-' if not regex.search(r'^(\-|\–)', next_data['text'][0]) else '') + next_data['text'][0]
                 elif current_operation == 'Remove spaced dashes from split lines':
                     # Check to see if the current line pointer is the last line in the text array
