@@ -675,7 +675,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–)', self.file_data[section_index + 1]['text'][0].strip())):
+                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\w|\w\")(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)(\w|\"\w))', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–)', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -954,7 +954,7 @@ class assister_application:
                         process_line_index = process_line_index + 2
                 elif current_operation == 'Add dashes to split lines':
                     # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
-                    if index == (len(current_data['text']) - 1) and not (regex.search(r'(\-|\–)$', line.strip()) and regex.search(r'^(\-|\–)', next_data['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', line.strip()) and regex.search(r'^(\w|\"\w|\-|\–)', next_data['text'][0].strip())):
+                    if index == (len(current_data['text']) - 1) and not (regex.search(r'(\w|\w\")(\-|\–)$', line.strip()) and regex.search(r'^(\-|\–)(\w|\"\w))', next_data['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', line.strip()) and regex.search(r'^(\w|\"\w|\-|\–)', next_data['text'][0].strip())):
                         # Check to see if the first sections line has a dash
                         if regex.search(r'(\-|\–)$', line.strip()):
                             # Check to see if the respective line has a spaced dash
