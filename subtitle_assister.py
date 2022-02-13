@@ -663,7 +663,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if (any(len(line) > 45 for line in section['text']) and not any(regex.search(r'^(\-|\–)', line) for line in section['text'])) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line in section['text'])):
+                if (any(len(line) > 45 for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) and not any(regex.search(r'^(\-|\–)', line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)))):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Convert vtt to srt':
@@ -912,6 +912,11 @@ class assister_application:
                     # Continue as sanatization is already performed
                     continue
                 elif current_operation == 'Trim long lines':
+                    # Check to make sure that the current line isn't the last line in the section
+                    if index == (len(current_data['text']) - 1):
+                        # Continue and skip current iteration
+                        continue
+
                     # Store the current line in perfet shape
                     current_line = current_data['text'][index]
 
