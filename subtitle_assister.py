@@ -655,7 +655,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if (any(len(line) > 45 for line in section['text']) and not any(line.startswith('- ') for line in section['text'])) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line in section['text'])):
+                if (any(len(line) > 45 for line in section['text']) and not any(regex.search(r'^(\-|\–)', line) for line in section['text'])) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line in section['text'])):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Convert vtt to srt':
@@ -667,7 +667,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and regex.search(r'(\w|-)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|-)', self.file_data[section_index + 1]['text'][0].strip()):
+                if not section_index == (len(self.file_data) - 1) and (not regex.search(r'(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)', section_data['text'][-1].strip())) and (regex.search(r'(\w|\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\-|\–)', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -934,10 +934,10 @@ class assister_application:
                         process_line_index = process_line_index + 2
                 elif current_operation == 'Add dashes to split lines':
                     # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
-                    if index == (len(current_data['text']) - 1) and regex.search(r'(\w|-)$', line.strip()) and regex.search(r'^(\w|-)', next_data['text'][0].strip()):
+                    if index == (len(current_data['text']) - 1) and regex.search(r'(\w|\-|\–)$', line.strip()) and regex.search(r'^(\w|\-|\–)', next_data['text'][0].strip()):
                         # Add the appropriate dashes to the current and next sections
-                        current_data['text'][index] = line + ('-' if not line.endswith('-') else '')
-                        next_data['text'][0] = ('-' if not next_data['text'][0].startswith('-') else '') + next_data['text'][0]
+                        current_data['text'][index] = line + ('-' if not regex.search(r'(\-|\–)$', line) else '')
+                        next_data['text'][0] = ('-' if not regex.search(r'^(\-|\–)', next_data['text'][0]) else '') + next_data['text'][0]
                 elif current_operation == 'Remove spaced dashes from split lines':
                     # Check to see if the current line pointer is the last line in the text array
                     if index == (len(current_data['text']) - 1):
