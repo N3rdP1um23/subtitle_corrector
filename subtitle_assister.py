@@ -23,6 +23,7 @@ class assister_application:
         'Remove lines with two or more consecutive uppercase characters',
         'Remove line ending dash',
         'Remove spaced line ending dash',
+        'Remove spaced line starting dash',
         'Remove space after three dots and a lowercase word',
         'Remove space after three dots and an uppercase word',
         'Remove space after three dots',
@@ -615,14 +616,21 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(line.endswith('-') for line in section['text'] if line == section['text'][-1]):
+                if any(regex.search(r'(\-|\–)$', line) for line in section['text'] if line == section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove spaced line ending dash':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(line.endswith(' -') for line in section['text'] if line == section['text'][-1]):
+                if any(regex.search(r'\ (\-|\–)$', line) for line in section['text'] if line == section['text'][-1]):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove spaced line starting dash':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'^(\-|\–)\ ', line) for line in section['text'] ):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots and a lowercase word':
@@ -675,7 +683,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and (regex.search(r'\ (\-|\–)$', section_data['text'][-1].strip()) or regex.search(r'^(\-|\–)\ ', self.file_data[section_index + 1]['text'][0].strip())):
+                if not section_index == (len(self.file_data) - 1) and (regex.search(r'(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'\ (\-|\–)$', section_data['text'][-1].strip()) or regex.search(r'^(\-|\–)\ ', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -751,8 +759,10 @@ class assister_application:
         self.current_index = self.current_index + 1 if current_operation not in self.section_spanning_operations.keys() else self.current_index + self.section_spanning_operations[current_operation]
         self.lblCurrentMatch['text'] = str(int(self.current_index))
 
-        # Add back on the line number for the next section
-        next_data['line_number'] = next_data_line_number
+        # Check to see if using an operation that spans more than one section
+        if current_operation in self.section_spanning_operations.keys():
+            # Add back on the line number for the next section
+            next_data['line_number'] = next_data_line_number
 
         # Check to see if use has approved all sections
         if approve_all == True:
@@ -855,14 +865,19 @@ class assister_application:
                             current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
                 elif current_operation == 'Remove line ending dash':
                     # Check to see if the current line is the last line in the section and ends with a dash
-                    if line == current_data['text'][-1] and line.endswith('-'):
+                    if line == current_data['text'][-1] and regex.search(r'(\-|\–)$', line):
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index][:-1]
                 elif current_operation == 'Remove spaced line ending dash':
-                    # Check to see if the current line is the last line in the section and ends with a dash
-                    if line == current_data['text'][-1] and line.endswith(' -'):
+                    # Check to see if the current line is the last line in the section and ends with a spaced dash
+                    if line == current_data['text'][-1] and regex.search(r'\ (\-|\–)$', line):
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index][:-2] + '-'
+                elif current_operation == 'Remove spaced line starting dash':
+                    # Check to see if the current line starts with a spaced dash
+                    if regex.search(r'^(\-|\–)\ ', line):
+                        # Update the strings
+                        current_data['text'][index] = '-' + current_data['text'][index][2:]
                 elif current_operation == 'Remove space after three dots and a lowercase word':
                     # Search the string
                     results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
