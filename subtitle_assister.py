@@ -675,7 +675,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\w|\w\")(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)(\w|\"\w))', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–)', self.file_data[section_index + 1]['text'][0].strip())):
+                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\w|\w\")(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)(\w|\"\w)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\w|\w\"|\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–)', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
