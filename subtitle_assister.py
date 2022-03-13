@@ -37,7 +37,8 @@ class assister_application:
         'Capitalize, add a period, and space people abbreviations',
         'Sanitize file',
         'Convert vtt to srt',
-        'Trim long lines'
+        'Trim long lines',
+        'Edit lines with colon immediately after a letter',
     ]
     section_spanning_operations = { # Operations that span more than one section and their respective sections they span
         'Add dashes to split lines': 2,
@@ -687,6 +688,13 @@ class assister_application:
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
+        elif current_operation == 'Edit lines with colon immediately after a letter':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'\w\:', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
 
         # Update the total matched label with the amount of sections to process
         self.total_items = len(sections_to_modify)
@@ -993,6 +1001,9 @@ class assister_application:
                         if regex.search(r'^(\-|\–)\ ', next_data['text'][0].strip()):
                             # Correct the dash position
                             next_data['text'][0] = '-' + next_data['text'][0][2:]
+                elif current_operation == 'Edit lines with colon immediately after a letter':
+                    continue
+
 
         # Update the current_data's text to be joined
         current_data['text'] = '\n'.join(current_data['text'])
