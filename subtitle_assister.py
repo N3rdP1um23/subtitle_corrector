@@ -676,7 +676,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\w|\w\")(\-|\–|\-\<i\>|\–\<i\>)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–|\<i\>\-|\<i\>\–)(\w|\"\w)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\,|\w|\w\"|\-|\–|\<i\>|\-\<i\>|\–\<i\>)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–|\<i\>|\<i\>\-|\<i\>\–)', self.file_data[section_index + 1]['text'][0].strip())):
+                if not section_index == (len(self.file_data) - 1) and not (regex.search(r'(\w|\w\")(\-|\–|\-\<i\>|\–\<i\>|\-\<\/i\>|\–\<\/i\>)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–|\<i\>\-|\<i\>\–)(\w|\"\w)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'(\,|\w|\w\"|\-|\–|\<i\>|\-\<i\>|\–\<i\>|\<\/i\>|\-\<\/i\>|\–\<\/i\>)$', section_data['text'][-1].strip()) and regex.search(r'^(\w|\"\w|\-|\–|\<i\>|\<i\>\-|\<i\>\–)', self.file_data[section_index + 1]['text'][0].strip())):
                     # Append the sections to the list that will hold the sections that need correcting
                     sections_to_modify.append(section_data)
                     sections_to_modify.append(self.file_data[section_index + 1])
@@ -962,18 +962,34 @@ class assister_application:
                         process_line_index = process_line_index + 2
                 elif current_operation == 'Add dashes to split lines':
                     # Check to see if the current line pointer is the last line in the text array and validate that the last line and the start of the next line are ready for modification
-                    if index == (len(current_data['text']) - 1) and not (regex.search(r'(\w|\w\")(\-|\–|\-\<i\>|\–\<i\>)$', line.strip()) and regex.search(r'^(\-|\–|\<i\>\-|\<i\>\–)(\w|\"\w)', next_data['text'][0].strip())) and (regex.search(r'(\,|\w|\w\"|\-|\–|\<i\>|\-\<i\>|\–\<i\>)$', line.strip()) and regex.search(r'^(\w|\"\w|\-|\–|\<i\>|\<i\>\-|\<i\>\–)', next_data['text'][0].strip())):
+                    if index == (len(current_data['text']) - 1) and not (regex.search(r'(\w|\w\")(\-|\–|\-\<i\>|\–\<i\>|\-\<\/i\>|\–\<\/i\>)$', line.strip()) and regex.search(r'^(\-|\–|\<i\>\-|\<i\>\–)(\w|\"\w)', next_data['text'][0].strip())) and (regex.search(r'(\,|\w|\w\"|\-|\–|\<i\>|\-\<i\>|\–\<i\>|\<\/i\>|\-\<\/i\>|\–\<\/i\>)$', line.strip()) and regex.search(r'^(\w|\"\w|\-|\–|\<i\>|\<i\>\-|\<i\>\–)', next_data['text'][0].strip())):
                         # Check to see if the first sections line ends in a dash
-                        if regex.search(r'(\-|\–|\-\<i\>|\–\<i\>)$', line.strip()):
+                        if regex.search(r'(\-|\–|\-\<i\>|\–\<i\>|\-\<\/i\>|\–\<\/i\>)$', line.strip()):
                             # Check to see if the respective line has a spaced dash
-                            if regex.search(r'\ (\-|\–|\-\<i\>|\–\<i\>)$', line.strip()):
-                                # Remove the spaced dash from the line
-                                current_data['text'][index] = line.strip()[:-5] + '-<i>' if line.strip().endswith('<i>') else line.strip()[:-2] + '-'
+                            if regex.search(r'\ (\-|\–|\-\<i\>|\–\<i\>|\-\<\/i\>|\–\<\/i\>)$', line.strip()):
+                                # Check to see if the line ends in a starting italics tag
+                                if line.strip().endswith('<i>'):
+                                    # Remove the spaced dash from the line
+                                    current_data['text'][index] = line.strip()[:-5] + '-<i>'
+                                elif line.strip().endswith('</i>'):
+                                    # Remove the spaced dash from the line
+                                    current_data['text'][index] = line.strip()[:-6] + '-</i>'
+                                else:
+                                    # Remove the spaced dash from the line
+                                    current_data['text'][index] = line.strip()[:-2] + '-'
                         else:
                             # Check to see if the first sections line ends with a special character
-                            if regex.search(r'(\,|\<i\>)$', line.strip()):
-                                # Add the dash to the current line in the correct location
-                                current_data['text'][index] = line.strip()[:-3] + '-<i>' if line.strip().endswith('<i>') else line.strip()[:-1] + '-'
+                            if regex.search(r'(\,|\<i\>|\<\/i\>)$', line.strip()):
+                                # Check to see if the line ends in a starting italics tag
+                                if line.strip().endswith('<i>'):
+                                    # Add the dash to the current line in the correct location
+                                    current_data['text'][index] = line.strip()[:-3] + '-<i>'
+                                elif line.strip().endswith('</i>'):
+                                    # Add the dash to the current line in the correct location
+                                    current_data['text'][index] = line.strip()[:-4] + '-</i>'
+                                else:
+                                    # Add the dash to the current line in the correct location
+                                    current_data['text'][index] = line.strip()[:-1] + '-'
                             else:
                                 # Add the dash to the current line in the correct location
                                 current_data['text'][index] = line.strip() + '-'
