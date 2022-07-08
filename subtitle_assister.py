@@ -30,6 +30,7 @@ class assister_application:
         'Edit full uppercase lines',
         'Edit lines with two or more consecutive uppercase characters',
         'Add space after line starting dash',
+        'Add space after line starting dash and three dots',
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and uppercase character',
         'Add dashes to split lines',
@@ -592,6 +593,13 @@ class assister_application:
                 if any(regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Add space after line starting dash and three dots':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w', line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash and lowercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -843,9 +851,9 @@ class assister_application:
                 elif current_operation in ['Edit full uppercase lines', 'Edit lines with two or more consecutive uppercase characters']:
                     # Skip iteration as no modifications need to be performed
                     continue
-                elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
+                elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and three dots', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
                     # Check to see if the current line is the one that matches
-                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])', line)):
+                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and three dots' and regex.search(r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])', line)):
                         # Check to see if the line contains a text modifier
                         if regex.search(r'\<i\>', line):
                             # Check to see if the line starts with with the text modifier
