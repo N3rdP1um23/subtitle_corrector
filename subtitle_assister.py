@@ -252,18 +252,21 @@ class assister_application:
         self.btnSkip = tk.Button(frame, text = 'Skip', command = self.skip_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkip.configure(state = DISABLED)
         self.btnSkip.pack(side = RIGHT, padx = 5)
+        self.btnPrevious = tk.Button(frame, text = 'Previous', command = self.previous_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnPrevious.configure(state = DISABLED)
+        self.btnPrevious.pack(side = RIGHT)
         self.btnEdit = tk.Button(frame, text = 'Edit', command = self.edit_new_section, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#4464AD', fg = 'white'
         self.btnEdit.configure(state = DISABLED)
-        self.btnEdit.pack(side = RIGHT)
+        self.btnEdit.pack(side = RIGHT, padx=5)
         self.btnApproveAll = tk.Button(frame, text = 'Approve All', command = self.approve_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnApproveAll.configure(state = DISABLED)
-        self.btnApproveAll.pack(side = RIGHT, padx = 5)
+        self.btnApproveAll.pack(side = RIGHT)
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkipAll.configure(state = DISABLED)
-        self.btnSkipAll.pack(side = RIGHT)
+        self.btnSkipAll.pack(side = RIGHT, padx=5)
         self.btnSaveSanitization = tk.Button(frame, text = 'Save Sanitization', command = self.save_sanitization, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSaveSanitization.configure(state = DISABLED)
-        self.btnSaveSanitization.pack(side = RIGHT, padx = 5)
+        self.btnSaveSanitization.pack(side = RIGHT)
 
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
@@ -326,6 +329,7 @@ class assister_application:
 
         # Disable the view buttons again
         self.btnEdit.configure(state = DISABLED)
+        self.btnPrevious.configure(state = DISABLED)
         self.btnSkip.configure(state = DISABLED)
         self.btnSkipAll.configure(state = DISABLED)
         self.btnApprove.configure(state = DISABLED)
@@ -366,6 +370,22 @@ class assister_application:
 
     # The following function is used to handle skipping the current section
     def skip_section(self):
+        # Call the function to handle setting up the data on the screen
+        self.setup_data()
+
+    # The following function is used to handle skipping the current section
+    def previous_section(self):
+        # Grab the current operation the user would like to perform
+        current_operation = self.selected_operation.get()
+
+        # Update the current index to the previous pointer
+        self.current_index = self.current_index - ((self.section_spanning_operations[current_operation] if current_operation in self.section_spanning_operations.keys() else 1) * 2)
+
+        # Check to see if the current index is 0
+        if self.current_index == 0:
+            # Disable the previous button to avoid issues
+            self.btnPrevious.configure(state = DISABLED)
+
         # Call the function to handle setting up the data on the screen
         self.setup_data()
 
@@ -731,6 +751,11 @@ class assister_application:
         # Grab the current operation the user would like to perform
         current_operation = self.selected_operation.get()
 
+        # Check to see if the current index is greater than 0
+        if self.current_index > 0:
+            # Disable the previous button to avoid issues
+            self.btnPrevious.configure(state = NORMAL)
+
         # Check to see if the file has been fully modified
         if self.current_index >= len(self.sections_to_modify):
             # Call the function to handle saving the modifications to the file
@@ -753,7 +778,7 @@ class assister_application:
         self.highlight_and_view(current_data['line_number'], highlight_end_index)
 
         # Remove the line_number from the data array
-        current_data.pop('line_number')
+        current_data_line_number = current_data.pop('line_number')
 
         # Create a variable that will store the next_data's line number
         next_data_line_number = None
@@ -794,6 +819,9 @@ class assister_application:
         if current_operation in self.section_spanning_operations.keys():
             # Add back on the line number for the next section
             next_data['line_number'] = next_data_line_number
+
+        # Add back on the line number for the current section
+        current_data['line_number'] = current_data_line_number
 
         # Check to see if use has approved all sections
         if approve_all == True:
