@@ -541,7 +541,14 @@ class assister_application:
                 self.file_data = [x for x in self.file_data if len(list(filter(None, x.split('\n')))) >= 3] # Filter out any lines that have no text
                 has_index = list(filter(None, self.file_data[0].split('\n')))[0].isnumeric()
                 index = 0
-                self.file_data = [{'index': list(filter(None, section.split('\n')))[0] if has_index else str(index := index + 1), 'time': list(filter(None, section.split('\n')))[1 if has_index else 0], 'text': list(filter(None, section.split('\n')))[2:] if has_index else list(filter(None, section.split('\n')))[1:], 'line_number': line_numbers[list(filter(None, section.split('\n')))[0]] if has_index else index} for section in self.file_data]
+                self.file_data = [
+                    {
+                        'index': list(filter(None, section.split('\n')))[0] if has_index else str(index := index + 1),
+                        'time': list(filter(None, section.split('\n')))[1 if has_index else 0],
+                        'text': list(filter(None, section.split('\n')))[2:] if has_index else list(filter(None, section.split('\n')))[1:],
+                        'line_number': line_numbers[list(filter(None, section.split('\n')))[0]] if has_index else index
+                    } for section in self.file_data
+                ]
 
                 # Load the main data into the file viewer
                 self.txtFileViewer.configure(state = 'normal')
@@ -739,13 +746,8 @@ class assister_application:
         current_data = self.sections_to_modify[self.current_index]
         next_data = self.sections_to_modify[self.current_index + 1] if current_operation in self.section_spanning_operations.keys() else None
 
-        # print(current_data)
-        # print(current_data['line_number'])
-
         # Calculate the ending index to highlight
         highlight_end_index = ((next_data['line_number'] + (len(next_data) - 2) + len(next_data['text']))) if current_operation in self.section_spanning_operations.keys() and not next_data == None else (current_data['line_number'] + (len(current_data) - 2) + len(current_data['text']))
-        # print(highlight_end_index)
-        # exit()
 
         # Call the function to handle highlighting the text and scrolling to it if need be
         self.highlight_and_view(current_data['line_number'], highlight_end_index)
