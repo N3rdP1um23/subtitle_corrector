@@ -739,8 +739,13 @@ class assister_application:
         current_data = self.sections_to_modify[self.current_index]
         next_data = self.sections_to_modify[self.current_index + 1] if current_operation in self.section_spanning_operations.keys() else None
 
+        print(current_data)
+        print(current_data['line_number'])
+
         # Calculate the ending index to highlight
         highlight_end_index = ((next_data['line_number'] + (len(next_data) - 2) + len(next_data['text']))) if current_operation in self.section_spanning_operations.keys() and not next_data == None else (current_data['line_number'] + (len(current_data) - 2) + len(current_data['text']))
+        print(highlight_end_index)
+        exit()
 
         # Call the function to handle highlighting the text and scrolling to it if need be
         self.highlight_and_view(current_data['line_number'], highlight_end_index)
