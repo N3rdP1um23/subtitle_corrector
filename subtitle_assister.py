@@ -1053,6 +1053,20 @@ class assister_application:
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-6].strip() + '-</i>'
 
+                                # Check to see if the line ending includes a comma before the dash
+                                if regex.search(r'\w\,(\-|\–).*$', current_data['text'][index].strip()):
+                                    # Replace the special character instance
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+                                    current_data['text'][index] = current_data['text'][index].strip().replace(',', '', 1)
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+
+                                # Check to see if the line ending includes and ellipsies before the dash
+                                if regex.search(r'\w\.\.\.(\-|\–).*$', current_data['text'][index].strip()):
+                                    # Replace the special character instance
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+                                    current_data['text'][index] = current_data['text'][index].strip().replace('...', '', 1)
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+
                             # Check to see if the second section needs correcting
                             if negative_second_section:
                                 # Check to see which scenario the line falls under and correct it accordingly
