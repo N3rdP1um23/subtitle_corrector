@@ -58,6 +58,39 @@ class assister_application:
     current_index = 0
     total_items = 0
     sections_to_modify = []
+    regex_statements = {
+        'Add dashes to split lines': {
+            'positive_first_section': r'[[:lower:]](\,|\.\.\.)?(\")?(\-|\–)(\")?(\<i\>|\<\/i\>)?$',
+            'negative_first_section': r'[[:lower:]](\ |\,|\.\.\.)?(\")?(\ )?(\-|\–)?(\")?(\<i\>|\<\/i\>)?$',
+            'positive_second_section': r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)(\")?[[:lower:]]',
+            'negative_second_section': r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)?(\")?(\ )?[[:lower:]]',
+        },
+        'Add space after line starting dash': r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)',
+        'Add space after line starting dash and lowercase character': r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])',
+        'Add space after line starting dash and three dots': r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w',
+        'Add space after line starting dash and uppercase character': r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])',
+        'Capitalize, add a period, and space people abbreviations': r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[a-zA-Z]',
+        'Convert vtt to srt': None,
+        'Edit full uppercase lines': None,
+        'Edit lines with colon immediately after a letter': r'\w\:',
+        'Edit lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
+        'Remove full uppercase lines': None,
+        'Remove line ending dash': r'(\-|\–)$',
+        'Remove lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
+        'Remove space after three dots': r'\.\.\.\ ',
+        'Remove space after three dots and a lowercase word': r'\.\.\.\ [[:lower:]]',
+        'Remove space after three dots and an uppercase word': r'\.\.\.\ [[:upper:]]',
+        'Remove spaced dashes from split lines': {
+            'first_section_dash_ending': r'(\-|\–)$',
+            'second_section_dash_starting': r'^(\-|\–)',
+            'first_section_spaced_dash_ending': r'\ (\-|\–)$',
+            'second_section_dash_spaced_starting': r'^(\-|\–)\ ',
+        },
+        'Remove spaced line ending dash': r'\ (\-|\–)$',
+        'Remove spaced line starting dash': r'^(\-|\–)\ ',
+        'Sanitize file': None,
+        'Trim long lines': r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)',
+    }
 
     # The following function is used as a constructor
     def __init__(self):
@@ -585,20 +618,62 @@ class assister_application:
         sections_to_modify = []
 
         # Check to see if the user is removing uppercase sentances
-        if current_operation == 'Remove full uppercase lines':
+        if current_operation == 'Add dashes to split lines':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if the current section isn't the last section in the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Create variables that represent different cases
+                    positive_first_section = regex.search(self.regex_statements[current_operation]['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                    negative_first_section = regex.search(self.regex_statements[current_operation]['negative_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
+                    positive_second_section = regex.search(self.regex_statements[current_operation]['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                    negative_second_section = regex.search(self.regex_statements[current_operation]['negative_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
+
+                    # Check to see if either of the sections need correcting
+                    if not bool(positive_first_section and positive_second_section) and (bool(negative_first_section and negative_second_section) or bool(positive_first_section and negative_second_section) or bool(negative_first_section and positive_second_section)):
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
+        elif current_operation == 'Add space after line starting dash':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(line.isupper() for line in section['text']):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
-        elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
+        elif current_operation == 'Add space after line starting dash and lowercase character':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'[[:upper:]]{2,}', line) for line in section['text']):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Add space after line starting dash and three dots':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Add space after line starting dash and uppercase character':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Capitalize, add a period, and space people abbreviations':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Convert vtt to srt':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Append the section to the list that will hold the sections that need correcting
+                sections_to_modify.append(section)
         elif current_operation == 'Edit full uppercase lines':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -606,88 +681,90 @@ class assister_application:
                 if any(line.isupper() for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Edit lines with colon immediately after a letter':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Edit lines with two or more consecutive uppercase characters':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'[[:upper:]]{2,}', line) for line in section['text']):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
-        elif current_operation == 'Add space after line starting dash':
+        elif current_operation == 'Remove full uppercase lines':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line) for line in section['text']):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Add space after line starting dash and three dots':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w', line) for line in section['text']):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Add space after line starting dash and lowercase character':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])', line) for line in section['text']):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Add space after line starting dash and uppercase character':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])', line) for line in section['text']):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Capitalize, add a period, and space people abbreviations':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[a-zA-Z]', line) for line in section['text']):
+                if any(line.isupper() for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove line ending dash':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'(\-|\–)$', line) for line in section['text'] if line == section['text'][-1]):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text'] if line == section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
-        elif current_operation == 'Remove spaced line ending dash':
+        elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'\ (\-|\–)$', line) for line in section['text'] if line == section['text'][-1]):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Remove spaced line starting dash':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'^(\-|\–)\ ', line) for line in section['text'] ):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Remove space after three dots and a lowercase word':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'\.\.\.\ [[:lower:]]', line) for line in section['text']):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Remove space after three dots and an uppercase word':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'\.\.\.\ [[:upper:]]', line) for line in section['text']):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(r'\.\.\.\ ', line) for line in section['text']):
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove space after three dots and a lowercase word':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove space after three dots and an uppercase word':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove spaced dashes from split lines':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if this section isn't the last section of the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Parse the various sections to see if they match the criteria
+                    first_section_dash_ending = regex.search(self.regex_statements[current_operation]['first_section_dash_ending'], section_data['text'][-1].strip())
+                    second_section_dash_starting = regex.search(self.regex_statements[current_operation]['second_section_dash_starting'], self.file_data[section_index + 1]['text'][0].strip())
+                    first_section_spaced_dash_ending = regex.search(self.regex_statements[current_operation]['first_section_spaced_dash_ending'], section_data['text'][-1].strip())
+                    second_section_dash_spaced_starting = regex.search(self.regex_statements[current_operation]['second_section_dash_spaced_starting'], self.file_data[section_index + 1]['text'][0].strip())
+
+                    # Check to see if the appropriate sections meet the requirements
+                    if (first_section_dash_ending and second_section_dash_starting) and (first_section_spaced_dash_ending or second_section_dash_spaced_starting):
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
+        elif current_operation == 'Remove spaced line ending dash':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text'] if line == section['text'][-1]):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
+        elif current_operation == 'Remove spaced line starting dash':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements[current_operation], line) for line in section['text'] ):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Sanitize file':
@@ -699,43 +776,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if (any(len(line) > 45 for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) and not any(regex.search(r'^(\-|\–)', line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) or (any(regex.search(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)))):
-                    # Append the section to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section)
-        elif current_operation == 'Convert vtt to srt':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Append the section to the list that will hold the sections that need correcting
-                sections_to_modify.append(section)
-        elif current_operation == 'Add dashes to split lines':
-            # Iterrate over each of the sections in the file
-            for section_index, section_data in enumerate(self.file_data):
-                # Check to see if the current section isn't the last section in the file
-                if not section_index == (len(self.file_data) - 1):
-                    # Create variables that represent different cases
-                    positive_first_section = regex.search(r'[[:lower:]](\,|\.\.\.)?(\")?(\-|\–)(\")?(\<i\>|\<\/i\>)?$', section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                    negative_first_section = regex.search(r'[[:lower:]](\ |\,|\.\.\.)?(\")?(\ )?(\-|\–)?(\")?(\<i\>|\<\/i\>)?$', section_data['text'][-1].strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
-                    positive_second_section = regex.search(r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)(\")?[[:lower:]]', self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
-                    negative_second_section = regex.search(r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)?(\")?(\ )?[[:lower:]]', self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
-
-                    # Check to see if either of the sections need correcting
-                    if not bool(positive_first_section and positive_second_section) and (bool(negative_first_section and negative_second_section) or bool(positive_first_section and negative_second_section) or bool(negative_first_section and positive_second_section)):
-                        # Append the sections to the list that will hold the sections that need correcting
-                        sections_to_modify.append(section_data)
-                        sections_to_modify.append(self.file_data[section_index + 1])
-        elif current_operation == 'Remove spaced dashes from split lines':
-            # Iterrate over each of the sections in the file
-            for section_index, section_data in enumerate(self.file_data):
-                # Check to see if this section isn't the last section and needs handling
-                if not section_index == (len(self.file_data) - 1) and (regex.search(r'(\-|\–)$', section_data['text'][-1].strip()) and regex.search(r'^(\-|\–)', self.file_data[section_index + 1]['text'][0].strip())) and (regex.search(r'\ (\-|\–)$', section_data['text'][-1].strip()) or regex.search(r'^(\-|\–)\ ', self.file_data[section_index + 1]['text'][0].strip())):
-                    # Append the sections to the list that will hold the sections that need correcting
-                    sections_to_modify.append(section_data)
-                    sections_to_modify.append(self.file_data[section_index + 1])
-        elif current_operation == 'Edit lines with colon immediately after a letter':
-            # Iterrate over each of the sections in the file
-            for section in self.file_data:
-                # Check to see if there's a line that needs handling
-                if any(regex.search(r'\w\:', line) for line in section['text']):
+                if (any(len(line) > 45 for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) and not any(regex.search(self.regex_statements['Remove spaced dashes from split lines']['second_section_dash_starting'], line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)) or (any(regex.search(self.regex_statements[current_operation], line) for line_index, line in enumerate(section['text']) if not line_index == (len(section['text']) - 1)))):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
 
@@ -881,144 +922,14 @@ class assister_application:
             # Iterate over the lines and correct the ones with the issue
             for index, line in enumerate(current_data['text'][process_line_index:].copy(), process_line_index):
                 # Check to see if the user is removing uppercase sentances
-                if current_operation == 'Remove full uppercase lines':
-                    # Check to see if the current line is the one that matches
-                    if line.isupper():
-                        # Zero out the line
-                        current_data['text'].remove(line)
-                elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
-                    # Check to see if the current line is the one that matches
-                    if regex.search(r'[[:upper:]]{2,}', line):
-                        # Zero out the line
-                        current_data['text'].remove(line)
-                elif current_operation in ['Edit full uppercase lines', 'Edit lines with two or more consecutive uppercase characters']:
-                    # Skip iteration as no modifications need to be performed
-                    continue
-                elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and three dots', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and uppercase character']:
-                    # Check to see if the current line is the one that matches
-                    if (current_operation == 'Add space after line starting dash' and regex.search(r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)', line)) or (current_operation == 'Add space after line starting dash and three dots' and regex.search(r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w', line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])', line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])', line)):
-                        # Check to see if the line contains a text modifier
-                        if regex.search(r'\<i\>', line):
-                            # Check to see if the line starts with with the text modifier
-                            if line.startswith('<i>'):
-                                # Correct the dash with no space
-                                current_data['text'][index] = '<i>- ' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
-                            else:
-                                # Correct the dash with no space
-                                current_data['text'][index] = '- <i>' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
-                        else:
-                            # Correct the dash with no space
-                            current_data['text'][index] = '- ' + current_data['text'][index][1:]
-                elif current_operation == 'Capitalize, add a period, and space people abbreviations':
-                    # Search the string
-                    results = regex.findall(r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[a-zA-Z]', line)
-
-                    # Check to see if the current line is the one that matches
-                    if results:
-                        # Iterate over the matches
-                        for match in results:
-                            # Update the match
-                            match = ''.join(match)
-
-                            # Update the strings
-                            current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
-                elif current_operation == 'Remove line ending dash':
-                    # Check to see if the current line is the last line in the section and ends with a dash
-                    if line == current_data['text'][-1] and regex.search(r'(\-|\–)$', line):
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index][:-1]
-                elif current_operation == 'Remove spaced line ending dash':
-                    # Check to see if the current line is the last line in the section and ends with a spaced dash
-                    if line == current_data['text'][-1] and regex.search(r'\ (\-|\–)$', line):
-                        # Update the strings
-                        current_data['text'][index] = current_data['text'][index][:-2] + '-'
-                elif current_operation == 'Remove spaced line starting dash':
-                    # Check to see if the current line starts with a spaced dash
-                    if regex.search(r'^(\-|\–)\ ', line):
-                        # Update the strings
-                        current_data['text'][index] = '-' + current_data['text'][index][2:]
-                elif current_operation == 'Remove space after three dots and a lowercase word':
-                    # Search the string
-                    results = regex.findall(r'\.\.\.\ [[:lower:]]', line)
-
-                    # Check to see if the current line is the one that matches
-                    if results:
-                        # Iterate over the matches
-                        for match in results:
-                            # Update the strings
-                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-                elif current_operation == 'Remove space after three dots and an uppercase word':
-                    # Search the string
-                    results = regex.findall(r'\.\.\.\ [[:upper:]]', line)
-
-                    # Check to see if the current line is the one that matches
-                    if results:
-                        # Iterate over the matches
-                        for match in results:
-                            # Update the strings
-                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-                elif current_operation == 'Remove space after three dots':
-                    # Search the string
-                    results = regex.findall(r'\.\.\.\ ', line)
-
-                    # Check to see if the current line is the one that matches
-                    if results:
-                        # Iterate over the matches
-                        for match in results:
-                            # Update the strings
-                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
-                elif current_operation == 'Sanitize file':
-                    # Continue as sanatization is already performed
-                    continue
-                elif current_operation == 'Trim long lines':
-                    # Check to make sure that the current line isn't the last line in the section
-                    if index == (len(current_data['text']) - 1):
-                        # Continue and skip current iteration
-                        continue
-
-                    # Store the current line in perfet shape
-                    current_line = current_data['text'][index]
-
-                    # Check to see if the current line has more than one speaker
-                    has_multiple_speakers = regex.findall(r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)', current_line)
-
-                    # Double check to make sure the current line is greater than 45 characters and doesn't start with a dash or has multiple speakers
-                    if (len(current_line) > 45 and not current_line.startswith('- ')) or has_multiple_speakers:
-                        # Check to see if handling for more than one speaker
-                        if has_multiple_speakers:
-                            # # Iterate over the matches and insert them correctly
-                            for  matched_group_index, matched_group_text in enumerate(has_multiple_speakers[0], 0):
-                                # Check to see if the index exists
-                                if (index + matched_group_index) < len(current_data['text']):
-                                    # Update the current index pointer with the matched string
-                                    current_data['text'][index + matched_group_index] = matched_group_text
-                                else:
-                                    # Insert the current index pointer with the matched string
-                                    current_data['text'].insert((index + matched_group_index), matched_group_text)
-                        else:
-                            # Convert the string to an array split by the spaces
-                            current_line = current_line.split(' ')
-
-                            # Grab the middle of the sentance (based on arrayed (split sentance by space) index middle point)
-                            split_index = ((len(current_line) // 2) if (len(current_line) // 2) % 2 == 0 else ((len(current_line) // 2) + 1))
-
-                            # Split the line current line and inser the remaining bak into the array
-                            current_data['text'][index] = ' '.join(current_line[:split_index]).strip()
-                            current_data['text'].insert((index + 1), ' '.join(current_line[split_index:]).strip())
-
-                        # Send the section to be further processed
-                        process_further = True
-
-                        # Skip over the current line pointer and two lines that have just been modified
-                        process_line_index = process_line_index + 2
-                elif current_operation == 'Add dashes to split lines':
+                if current_operation == 'Add dashes to split lines':
                     # Check to see if the current section isn't the last section in the file
                     if index == (len(current_data['text']) - 1):
                         # Create variables that represent different cases
-                        positive_first_section = regex.search(r'[[:lower:]](\,|\.\.\.)?(\")?(\-|\–)(\")?(\<i\>|\<\/i\>)?$', line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                        negative_first_section = regex.search(r'[[:lower:]](\ |\,|\.\.\.)?(\")?(\ )?(\-|\–)?(\")?(\<i\>|\<\/i\>)?$', line.strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
-                        positive_second_section = regex.search(r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)(\")?[[:lower:]]', next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
-                        negative_second_section = regex.search(r'^(\<i\>|\<\/i\>)?(\")?(\-|\–)?(\")?(\ )?[[:lower:]]', next_data['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
+                        positive_first_section = regex.search(self.regex_statements[current_operation]['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                        negative_first_section = regex.search(self.regex_statements[current_operation]['negative_first_section'], line.strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
+                        positive_second_section = regex.search(self.regex_statements[current_operation]['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                        negative_second_section = regex.search(self.regex_statements[current_operation]['negative_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
 
                         # Check to see if either of the sections need correcting
                         if not bool(positive_first_section and positive_second_section) and (bool(negative_first_section and negative_second_section) or bool(positive_first_section and negative_second_section) or bool(negative_first_section and positive_second_section)):
@@ -1103,20 +1014,145 @@ class assister_application:
                                 elif regex.search(r'^\<\/i\>(\-|\–)\ [[:lower:]]', next_data['text'][0].strip()): # closing italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
+                elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and three dots', 'Add space after line starting dash and uppercase character']:
+                    # Check to see if the current line is the one that matches
+                    if (current_operation == 'Add space after line starting dash' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and three dots' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(self.regex_statements[current_operation], line)):
+                        # Check to see if the line contains a text modifier
+                        if regex.search(r'\<i\>', line):
+                            # Check to see if the line starts with with the text modifier
+                            if line.startswith('<i>'):
+                                # Correct the dash with no space
+                                current_data['text'][index] = '<i>- ' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
+                            else:
+                                # Correct the dash with no space
+                                current_data['text'][index] = '- <i>' + current_data['text'][index].replace('<i>', '').replace('</i>', '')[1:] + '</i>'
+                        else:
+                            # Correct the dash with no space
+                            current_data['text'][index] = '- ' + current_data['text'][index][1:]
+                elif current_operation == 'Capitalize, add a period, and space people abbreviations':
+                    # Search the string
+                    results = regex.findall(self.regex_statements[current_operation], line)
+
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the match
+                            match = ''.join(match)
+
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
+                elif current_operation in ['Edit full uppercase lines', 'Edit lines with colon immediately after a letter', 'Edit lines with two or more consecutive uppercase characters', 'Sanitize file']:
+                    # Skip iteration as no modifications need to be performed
+                    continue
+                elif current_operation == 'Remove full uppercase lines':
+                    # Check to see if the current line is the one that matches
+                    if line.isupper():
+                        # Zero out the line
+                        current_data['text'].remove(line)
+                elif current_operation == 'Remove line ending dash':
+                    # Check to see if the current line is the last line in the section and ends with a dash
+                    if line == current_data['text'][-1] and regex.search(self.regex_statements[current_operation], line):
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index][:-1]
+                elif current_operation == 'Remove lines with two or more consecutive uppercase characters':
+                    # Check to see if the current line is the one that matches
+                    if regex.search(self.regex_statements[current_operation], line):
+                        # Zero out the line
+                        current_data['text'].remove(line)
+                elif current_operation == 'Remove space after three dots':
+                    # Search the string
+                    results = regex.findall(self.regex_statements[current_operation], line)
+
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+                elif current_operation == 'Remove space after three dots and a lowercase word':
+                    # Search the string
+                    results = regex.findall(self.regex_statements[current_operation], line)
+
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
+                elif current_operation == 'Remove space after three dots and an uppercase word':
+                    # Search the string
+                    results = regex.findall(self.regex_statements[current_operation], line)
+
+                    # Check to see if the current line is the one that matches
+                    if results:
+                        # Iterate over the matches
+                        for match in results:
+                            # Update the strings
+                            current_data['text'][index] = current_data['text'][index].replace(match, match.replace(' ', ''))
                 elif current_operation == 'Remove spaced dashes from split lines':
                     # Check to see if the current line pointer is the last line in the text array
                     if index == (len(current_data['text']) - 1):
                         # Check to see if the correction should be applied to the iterated line
-                        if regex.search(r'\ (\-|\–)$', line.strip()):
+                        if regex.search(self.regex_statements[current_operation]['first_section_spaced_dash_ending'], line.strip()):
                             # Correct the dash position
                             current_data['text'][index] = line[:-2] + '-'
 
                         # Check to see if the correction should be applied to the next section line
-                        if regex.search(r'^(\-|\–)\ ', next_data['text'][0].strip()):
+                        if regex.search(self.regex_statements[current_operation]['second_section_dash_spaced_starting'], next_data['text'][0].strip()):
                             # Correct the dash position
                             next_data['text'][0] = '-' + next_data['text'][0][2:]
-                elif current_operation == 'Edit lines with colon immediately after a letter':
-                    continue
+                elif current_operation == 'Remove spaced line starting dash':
+                    # Check to see if the current line starts with a spaced dash
+                    if regex.search(self.regex_statements[current_operation], line):
+                        # Update the strings
+                        current_data['text'][index] = '-' + current_data['text'][index][2:]
+                elif current_operation == 'Remove spaced line ending dash':
+                    # Check to see if the current line is the last line in the section and ends with a spaced dash
+                    if line == current_data['text'][-1] and regex.search(self.regex_statements[current_operation], line):
+                        # Update the strings
+                        current_data['text'][index] = current_data['text'][index][:-2] + '-'
+                elif current_operation == 'Trim long lines':
+                    # Check to make sure that the current line isn't the last line in the section
+                    if index == (len(current_data['text']) - 1):
+                        # Continue and skip current iteration
+                        continue
+
+                    # Store the current line in perfet shape
+                    current_line = current_data['text'][index]
+
+                    # Check to see if the current line has more than one speaker
+                    has_multiple_speakers = regex.findall(self.regex_statements[current_operation], current_line)
+
+                    # Double check to make sure the current line is greater than 45 characters and doesn't start with a dash or has multiple speakers
+                    if (len(current_line) > 45 and not current_line.startswith('- ')) or has_multiple_speakers:
+                        # Check to see if handling for more than one speaker
+                        if has_multiple_speakers:
+                            # # Iterate over the matches and insert them correctly
+                            for  matched_group_index, matched_group_text in enumerate(has_multiple_speakers[0], 0):
+                                # Check to see if the index exists
+                                if (index + matched_group_index) < len(current_data['text']):
+                                    # Update the current index pointer with the matched string
+                                    current_data['text'][index + matched_group_index] = matched_group_text
+                                else:
+                                    # Insert the current index pointer with the matched string
+                                    current_data['text'].insert((index + matched_group_index), matched_group_text)
+                        else:
+                            # Convert the string to an array split by the spaces
+                            current_line = current_line.split(' ')
+
+                            # Grab the middle of the sentance (based on arrayed (split sentance by space) index middle point)
+                            split_index = ((len(current_line) // 2) if (len(current_line) // 2) % 2 == 0 else ((len(current_line) // 2) + 1))
+
+                            # Split the line current line and inser the remaining bak into the array
+                            current_data['text'][index] = ' '.join(current_line[:split_index]).strip()
+                            current_data['text'].insert((index + 1), ' '.join(current_line[split_index:]).strip())
+
+                        # Send the section to be further processed
+                        process_further = True
+
+                        # Skip over the current line pointer and two lines that have just been modified
+                        process_line_index = process_line_index + 2
 
         # Update the current_data's text to be joined
         current_data['text'] = '\n'.join(current_data['text'])
