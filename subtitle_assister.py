@@ -779,7 +779,7 @@ class assister_application:
                     section_delta = second_section_start - first_section_end
 
                     # Check to see if the sections are quick and need correcting
-                    if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=2) and section_delta <= timedelta(seconds=10, microseconds=0)):
+                    if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=200) and section_delta <= timedelta(seconds=10, microseconds=0)):
                         # Append the sections to the list that will hold the sections that need correcting
                         sections_to_modify.append(section_data)
                         sections_to_modify.append(self.file_data[section_index + 1])
@@ -1141,7 +1141,7 @@ class assister_application:
                             section_delta = second_section_start - first_section_end
 
                             # Check to see if the sections are quick and need correcting
-                            if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=2) and section_delta <= timedelta(seconds=10, microseconds=0)):
+                            if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=200) and section_delta <= timedelta(seconds=10, microseconds=0)):
                                 # Modify the first section and replace the respective line ending dash to three dots
                                 current_data['text'][index] = current_data['text'][index].strip()[::-1]
                                 current_data['text'][index] = current_data['text'][index].strip().replace('-', '...', 1)
