@@ -14,6 +14,7 @@ from tkinter import messagebox as mb
 import os
 from tkinter.constants import BOTH, BOTTOM, DISABLED, END, HORIZONTAL, LEFT, NONE, NORMAL, NW, RIGHT, SW, TOP, VERTICAL, W, X, Y
 import regex
+from datetime import datetime, timedelta
 
 # The following is a class that's used for setting up the application GUI
 class assister_application:
@@ -38,12 +39,14 @@ class assister_application:
         'Remove spaced dashes from split lines',
         'Remove spaced line ending dash',
         'Remove spaced line starting dash',
+        'Replace dashes with three dots for quick lines',
         'Sanitize file',
         'Trim long lines',
     ]
     section_spanning_operations = { # Operations that span more than one section and their respective sections they span
         'Add dashes to split lines': 2,
-        'Remove spaced dashes from split lines': 2
+        'Remove spaced dashes from split lines': 2,
+        'Replace dashes with three dots for quick lines': 2,
     }
     supported_files = (
         ('SubRip File', '*.srt'),
@@ -70,11 +73,8 @@ class assister_application:
         'Add space after line starting dash and three dots': r'^((\-|\–)|\<i\>(\-|\–)|(\-|\–)\<i\>)\.\.\.\w',
         'Add space after line starting dash and uppercase character': r'^((\-|\–)[[:upper:]]|\<i\>(\-|\–)[[:upper:]]|(\-|\–)\<i\>[[:upper:]]|(\-|\–)\"[[:upper:]]|(\-|\–)\.\.\.[[:upper:]])',
         'Capitalize, add a period, and space people abbreviations': r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[a-zA-Z]',
-        'Convert vtt to srt': None,
-        'Edit full uppercase lines': None,
         'Edit lines with colon immediately after a letter': r'\w\:',
         'Edit lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
-        'Remove full uppercase lines': None,
         'Remove line ending dash': r'(\-|\–)$',
         'Remove lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
         'Remove space after three dots': r'\.\.\.\ ',
@@ -88,7 +88,6 @@ class assister_application:
         },
         'Remove spaced line ending dash': r'\ (\-|\–)$',
         'Remove spaced line starting dash': r'^(\-|\–)\ ',
-        'Sanitize file': None,
         'Trim long lines': r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)',
     }
 
@@ -767,6 +766,23 @@ class assister_application:
                 if any(regex.search(self.regex_statements[current_operation], line) for line in section['text'] ):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Replace dashes with three dots for quick lines':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if the current section isn't the last section in the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Create variables that represent different cases
+                    positive_first_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                    positive_second_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                    first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1], "%H:%M:%S,%f")
+                    second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0], "%H:%M:%S,%f")
+                    section_delta = second_section_start - first_section_end
+
+                    # Check to see if the sections are quick and need correcting
+                    if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=0) and section_delta <= timedelta(seconds=2, microseconds=0)):
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
         elif current_operation == 'Sanitize file':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1112,6 +1128,27 @@ class assister_application:
                     if line == current_data['text'][-1] and regex.search(self.regex_statements[current_operation], line):
                         # Update the strings
                         current_data['text'][index] = current_data['text'][index][:-2] + '-'
+                elif current_operation == 'Replace dashes with three dots for quick lines':
+                    # Iterrate over each of the sections in the file
+                    for section_index, section_data in enumerate(self.file_data):
+                        # Check to see if the current section isn't the last section in the file
+                        if not section_index == (len(self.file_data) - 1):
+                            # Create variables that represent different cases
+                            positive_first_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                            positive_second_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                            first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1], "%H:%M:%S,%f")
+                            second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0], "%H:%M:%S,%f")
+                            section_delta = second_section_start - first_section_end
+
+                            # Check to see if the sections are quick and need correcting
+                            if bool(positive_first_section and positive_second_section) and (section_delta >= timedelta(seconds=1, microseconds=0) and section_delta <= timedelta(seconds=2, microseconds=0)):
+                                # Modify the first section and replace the respective line ending dash to three dots
+                                current_data['text'][index] = current_data['text'][index].strip()[::-1]
+                                current_data['text'][index] = current_data['text'][index].strip().replace('-', '...', 1)
+                                current_data['text'][index] = current_data['text'][index].strip()[::-1]
+
+                                # Modify the second section and replace the respective line starting dash to three dots
+                                next_data['text'][0] = next_data['text'][0].strip().replace('-', '...', 1)
                 elif current_operation == 'Trim long lines':
                     # Check to make sure that the current line isn't the last line in the section
                     if index == (len(current_data['text']) - 1):
