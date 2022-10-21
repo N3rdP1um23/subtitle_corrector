@@ -702,8 +702,14 @@ class assister_application:
                     sections_to_modify.append(section)
         elif current_operation == 'Find and replace':
             # Ask the user for a work or string to find and replace
-            self.find_and_replace['find'] = sd.askstring(title="Find and Replace", prompt="What word or sentence would you like to find?")
-            self.find_and_replace['replace'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['find']))
+            # Check to see if the find value is missing
+            if self.find_and_replace['find'] == "":
+                # Ask for the "find" value
+                self.find_and_replace['find'] = sd.askstring(title="Find and Replace", prompt="What word or sentence would you like to find?")
+            # Check to see if the replace value is missing
+            if self.find_and_replace['replace'] == "":
+                # Ask for the "replace" value
+                self.find_and_replace['replace'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['find']))
 
             # Iterrate over each of the sections in the file
             for section in self.file_data:
