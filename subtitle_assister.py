@@ -374,6 +374,10 @@ class assister_application:
         self.btnApproveAll.configure(state = DISABLED)
         self.btnSaveSanitization.configure(state = DISABLED)
 
+        # Reset the find/replace values
+        self.find_and_replace['find'] = ""
+        self.find_and_replace['replace'] = ""
+
         # Reset the progress bar
         self.pgbQueue['value'] = 0
 
