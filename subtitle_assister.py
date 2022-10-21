@@ -358,6 +358,10 @@ class assister_application:
             self.lbxQueue.delete(0, END)
             self.selected_files = []
 
+            # Reset the find/replace values
+            self.find_and_replace['find'] = ""
+            self.find_and_replace['replace'] = ""
+
         # Clear the queue, selected files, inputs, and reset states
         self.drpOperation.configure(state = NORMAL)
         self.current_file_index = -1
@@ -373,10 +377,6 @@ class assister_application:
         self.btnApprove.configure(state = DISABLED)
         self.btnApproveAll.configure(state = DISABLED)
         self.btnSaveSanitization.configure(state = DISABLED)
-
-        # Reset the find/replace values
-        self.find_and_replace['find'] = ""
-        self.find_and_replace['replace'] = ""
 
         # Reset the progress bar
         self.pgbQueue['value'] = 0
