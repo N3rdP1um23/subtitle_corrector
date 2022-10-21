@@ -93,8 +93,8 @@ class assister_application:
         'Trim long lines': r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)',
     }
     find_and_replace = {
-        'FIND': '',
-        'REPLACE': ''
+        'find': '',
+        'replace': ''
     }
 
     # The following function is used as a constructor
@@ -702,13 +702,13 @@ class assister_application:
                     sections_to_modify.append(section)
         elif current_operation == 'Find and replace':
             # Ask the user for a work or string to find and replace
-            self.find_and_replace['FIND'] = sd.askstring(title="Find and Replace", prompt="What word or sentence would you like to find?")
-            self.find_and_replace['REPLACE'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['FIND']))
+            self.find_and_replace['find'] = sd.askstring(title="Find and Replace", prompt="What word or sentence would you like to find?")
+            self.find_and_replace['replace'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['find']))
 
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(self.find_and_replace['FIND'] in line for line in section['text']):
+                if any(self.find_and_replace['find'] in line for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove full uppercase lines':
@@ -1080,9 +1080,9 @@ class assister_application:
                     continue
                 elif current_operation == 'Find and replace':
                     # Check to see if the line has the find string
-                    if self.find_and_replace['FIND'] in line:
+                    if self.find_and_replace['find'] in line:
                         # Perform the replacement
-                        current_data['text'][index] = line.replace(self.find_and_replace['FIND'], self.find_and_replace['REPLACE'])
+                        current_data['text'][index] = line.replace(self.find_and_replace['find'], self.find_and_replace['replace'])
                 elif current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
                     if line.isupper():
