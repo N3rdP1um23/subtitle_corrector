@@ -11,6 +11,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
+from tkinter import simpledialog as sd
 import os
 from tkinter.constants import BOTH, BOTTOM, DISABLED, END, HORIZONTAL, LEFT, NONE, NORMAL, NW, RIGHT, SW, TOP, VERTICAL, W, X, Y
 import regex
@@ -30,6 +31,7 @@ class assister_application:
         'Edit full uppercase lines',
         'Edit lines with colon immediately after a letter',
         'Edit lines with two or more consecutive uppercase characters',
+        'Find and replace',
         'Remove full uppercase lines',
         'Remove line ending dash',
         'Remove lines with two or more consecutive uppercase characters',
@@ -89,6 +91,10 @@ class assister_application:
         'Remove spaced line ending dash': r'\ (\-|\–)$',
         'Remove spaced line starting dash': r'^(\-|\–)\ ',
         'Trim long lines': r'((?:\-|\–)\ .+(?|!|.|))\ ((?:\-|\–)\ .*)',
+    }
+    find_and_replace = {
+        'FIND': '',
+        'REPLACE': ''
     }
 
     # The following function is used as a constructor
@@ -694,6 +700,17 @@ class assister_application:
                 if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Find and replace':
+            # Ask the user for a work or string to find and replace
+            self.find_and_replace['FIND'] = sd.askstring(title="Find and Replace", prompt="What word or sentence would you like to find?")
+            self.find_and_replace['REPLACE'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['FIND']))
+
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(self.find_and_replace['FIND'] in line for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Remove full uppercase lines':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1061,6 +1078,11 @@ class assister_application:
                 elif current_operation in ['Edit full uppercase lines', 'Edit lines with colon immediately after a letter', 'Edit lines with two or more consecutive uppercase characters', 'Sanitize file']:
                     # Skip iteration as no modifications need to be performed
                     continue
+                elif current_operation == 'Find and replace':
+                    # Check to see if the line has the find string
+                    if self.find_and_replace['FIND'] in line:
+                        # Perform the replacement
+                        current_data['text'][index] = line.replace(self.find_and_replace['FIND'], self.find_and_replace['REPLACE'])
                 elif current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
                     if line.isupper():
