@@ -174,7 +174,7 @@ class assister_application:
         # Add the start and clear buttons
         tk.Button(frame, text = 'Start', command = self.start_operation).pack(pady = 5, fill = X)
         tk.Button(frame, text = 'Clear', command = self.clear_application).pack(pady = 5, fill = X)
-        tk.Button(frame, text = 'Reset Find and Replace', command = self.clear_application).pack(pady = 5, fill = X)
+        tk.Button(frame, text = 'Reset Find and Replace', command = self.clear_find_and_replace).pack(pady = 5, fill = X)
 
         # Add the queue label
         tk.Label(frame, text = 'Progress', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
@@ -381,6 +381,12 @@ class assister_application:
 
         # Reset the progress bar
         self.pgbQueue['value'] = 0
+
+    # The following function is used to handle clearning the find and replace values
+    def clear_find_and_replace(self, clear_queue = True):
+        # Reset the find/replace values
+        self.find_and_replace['find'] = ""
+        self.find_and_replace['replace'] = ""
 
     # The foloowing function is used to handle clearing the file viewer items
     def clear_file_viewer(self):
