@@ -174,6 +174,7 @@ class assister_application:
         # Add the start and clear buttons
         tk.Button(frame, text = 'Start', command = self.start_operation).pack(pady = 5, fill = X)
         tk.Button(frame, text = 'Clear', command = self.clear_application).pack(pady = 5, fill = X)
+        tk.Button(frame, text = 'Reset Find and Replace', command = self.clear_application).pack(pady = 5, fill = X)
 
         # Add the queue label
         tk.Label(frame, text = 'Progress', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
