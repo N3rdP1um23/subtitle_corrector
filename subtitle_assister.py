@@ -1098,9 +1098,19 @@ class assister_application:
                 elif current_operation == 'Find and replace':
                     # Check to see if the line has the find string
                     if self.find_and_replace['find'] in line:
-                        # Perform the replacement
+                        # Grab some preliminary index points
+                        pre_i_ending_index = line.index(self.find_and_replace['find'])
+                        pre_i_starting_index = (pre_i_ending_index - 3)
+                        pre_i_string = line[pre_i_starting_index:pre_i_ending_index]
+                        post_i_starting_index = (line.index(self.find_and_replace['find']) + len(self.find_and_replace['find']))
+                        post_i_ending_index = (post_i_starting_index + 4)
+                        post_i_string = line[post_i_starting_index:post_i_ending_index]
+
                         # Formulate the patter to search for and replace
-                        find_string = regex.escape(self.find_and_replace['find'].strip()) + ('\ ?' if self.find_and_replace['replace'] == "" and not line.endswith(self.find_and_replace['find'].strip()) else '')
+                        find_string = ('\<i\>' if self.find_and_replace['replace'].startswith('<i>') and pre_i_string == '<i>' else '')
+                        find_string = find_string + regex.escape(self.find_and_replace['find'].strip())
+                        find_string = find_string + ('\ ?' if self.find_and_replace['replace'] == "" and not line.endswith(self.find_and_replace['find'].strip()) else '')
+                        find_string = find_string + ('\<\/i\>' if self.find_and_replace['replace'].endswith('</i>') and post_i_string == "</i>" else '')
 
                         # Replace the actual line
                         current_data['text'][index] = regex.sub(find_string, self.find_and_replace['replace'].strip(), line)
