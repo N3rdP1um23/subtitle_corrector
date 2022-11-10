@@ -1099,7 +1099,11 @@ class assister_application:
                     # Check to see if the line has the find string
                     if self.find_and_replace['find'] in line:
                         # Perform the replacement
-                        current_data['text'][index] = line.replace(self.find_and_replace['find'].strip() + (' ' if self.find_and_replace['replace'] == "" and not line.endswith(self.find_and_replace['find'].strip()) else ''), self.find_and_replace['replace'])
+                        # Formulate the patter to search for and replace
+                        find_string = regex.escape(self.find_and_replace['find'].strip()) + ('\ ?' if self.find_and_replace['replace'] == "" and not line.endswith(self.find_and_replace['find'].strip()) else '')
+
+                        # Replace the actual line
+                        current_data['text'][index] = regex.sub(find_string, self.find_and_replace['replace'].strip(), line)
                 elif current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
                     if line.isupper():
