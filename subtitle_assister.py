@@ -720,7 +720,10 @@ class assister_application:
             # Check to see if the replace value is missing
             if self.find_and_replace['replace'] == "":
                 # Ask for the "replace" value
-                self.find_and_replace['replace'] = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['find']))
+                replace_value = sd.askstring(title="Find and Replace", prompt="What would you like to replace '{find}' with?".format(find = self.find_and_replace['find']))
+
+                # Update the find and replace values
+                self.find_and_replace['replace'] = replace_value if replace_value != "" else None
 
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1106,14 +1109,17 @@ class assister_application:
                         post_i_ending_index = (post_i_starting_index + 4)
                         post_i_string = line[post_i_starting_index:post_i_ending_index]
 
+                        # Create a local replace_value holder
+                        replace_value = "" if self.find_and_replace['replace'] == None else self.find_and_replace['replace']
+
                         # Formulate the patter to search for and replace
-                        find_string = ('\<i\>' if self.find_and_replace['replace'].startswith('<i>') and pre_i_string == '<i>' else '')
+                        find_string = ('\<i\>' if replace_value.startswith('<i>') and pre_i_string == '<i>' else '')
                         find_string = find_string + regex.escape(self.find_and_replace['find'].strip())
-                        find_string = find_string + ('\ ?' if self.find_and_replace['replace'] == "" and not line.endswith(self.find_and_replace['find'].strip()) else '')
-                        find_string = find_string + ('\<\/i\>' if self.find_and_replace['replace'].endswith('</i>') and post_i_string == "</i>" else '')
+                        find_string = find_string + ('\ ?' if replace_value == "" and not line.endswith(self.find_and_replace['find'].strip()) else '')
+                        find_string = find_string + ('\<\/i\>' if replace_value.endswith('</i>') and post_i_string == "</i>" else '')
 
                         # Replace the actual line
-                        current_data['text'][index] = regex.sub(find_string, self.find_and_replace['replace'].strip(), line)
+                        current_data['text'][index] = regex.sub(find_string, replace_value.strip(), line)
                 elif current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
                     if line.isupper():
