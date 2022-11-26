@@ -303,9 +303,12 @@ class assister_application:
         self.btnSkipAll = tk.Button(frame, text = 'Skip All', command = self.skip_all_sections, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSkipAll.configure(state = DISABLED)
         self.btnSkipAll.pack(side = RIGHT, padx=5)
+        self.btnApproveAllFiles = tk.Button(frame, text = 'Approve All Files', command = self.approve_all_files, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
+        self.btnApproveAllFiles.configure(state = DISABLED)
+        self.btnApproveAllFiles.pack(side = RIGHT)
         self.btnSaveSanitization = tk.Button(frame, text = 'Save Sanitization', command = self.save_sanitization, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#FE4A49', fg = 'white'
         self.btnSaveSanitization.configure(state = DISABLED)
-        self.btnSaveSanitization.pack(side = RIGHT)
+        self.btnSaveSanitization.pack(side = RIGHT, padx=5)
 
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
@@ -342,6 +345,7 @@ class assister_application:
             self.btnSkipAll.configure(state = NORMAL)
             self.btnApprove.configure(state = NORMAL)
             self.btnApproveAll.configure(state = NORMAL)
+            self.btnApproveAllFiles.configure(state = NORMAL)
 
             # Check if performing the sanitization operation
             if self.selected_operation.get() == 'Sanitize file':
@@ -377,6 +381,7 @@ class assister_application:
         self.btnSkipAll.configure(state = DISABLED)
         self.btnApprove.configure(state = DISABLED)
         self.btnApproveAll.configure(state = DISABLED)
+        self.btnApproveAllFiles.configure(state = DISABLED)
         self.btnSaveSanitization.configure(state = DISABLED)
 
         # Reset the progress bar
@@ -510,13 +515,17 @@ class assister_application:
         # Call the function to handle approving the current section - and passalong that the user wan't to approve all sections
         self.approve_section(approve_all = True)
 
+    # The following function is used to handle approving all files in the queue
+    def approve_all_files(self):
+        # Iterate over each of the sections approving and changing the file
+        for file in self.selected_files:
+            # Call the function to handle approving the current section - and passalong that the user wan't to approve all sections
+            self.approve_section(approve_all = True)
+
     # The following function is used to handle approving all sections
     def save_sanitization(self):
         # Call the function to handle saving the modifications to the file
         self.save_modifications()
-
-        # Call the function that's used to handle changing to the next file
-        self.change_file()
 
     ###
     #
