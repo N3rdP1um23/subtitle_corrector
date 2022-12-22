@@ -22,6 +22,7 @@ class assister_application:
     # Create the class specific properties
     operations = [
         'Add dashes to split lines',
+        'Add missing italics',
         'Add space after line starting dash',
         'Add space after line starting dash and lowercase character',
         'Add space after line starting dash and three dots',
@@ -661,6 +662,17 @@ class assister_application:
                         # Append the sections to the list that will hold the sections that need correcting
                         sections_to_modify.append(section_data)
                         sections_to_modify.append(self.file_data[section_index + 1])
+        elif current_operation == 'Add missing italics':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Count number of occurances in text
+                opening_italics = sum(line.count('<i>') for line in section['text'])
+                closing_italics = sum(line.count('</i>') for line in section['text'])
+
+                # Check to see if there's a line that needs handling
+                if opening_italics != closing_italics:
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1085,6 +1097,11 @@ class assister_application:
                                 elif regex.search(r'^\<\/i\>(\-|\–)\ [[:lower:]]', next_data['text'][0].strip()): # closing italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
+                elif current_operation == 'Add missing italics':
+                    # Check to see if the current index is the last index in the list of text
+                    if index == len(current_data['text']) - 1:
+                        # Append the closing italic
+                        current_data['text'][index] = current_data['text'][index] + '</i>'
                 elif current_operation in ['Add space after line starting dash', 'Add space after line starting dash and lowercase character', 'Add space after line starting dash and three dots', 'Add space after line starting dash and uppercase character']:
                     # Check to see if the current line is the one that matches
                     if (current_operation == 'Add space after line starting dash' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and three dots' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and lowercase character' and regex.search(self.regex_statements[current_operation], line)) or (current_operation == 'Add space after line starting dash and uppercase character' and regex.search(self.regex_statements[current_operation], line)):
