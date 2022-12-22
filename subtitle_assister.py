@@ -34,6 +34,7 @@ class assister_application:
         'Edit lines with two or more consecutive uppercase characters',
         'Edit lines with that don\'t have line ending punctuation',
         'Find and replace',
+        'Fix time overlaps',
         'Remove full uppercase lines',
         'Remove line ending dash',
         'Remove lines with two or more consecutive uppercase characters',
@@ -49,6 +50,7 @@ class assister_application:
     ]
     section_spanning_operations = { # Operations that span more than one section and their respective sections they span
         'Add dashes to split lines': 2,
+        'Fix time overlaps': 2,
         'Remove spaced dashes from split lines': 2,
         'Replace dashes with three dots for quick lines': 2,
     }
@@ -761,6 +763,20 @@ class assister_application:
                 if any(self.find_and_replace['find'] in line for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Fix time overlaps':
+             # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if the current section isn't the last section in the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Grab the respective time values
+                    first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
+                    second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0].strip(), "%H:%M:%S,%f")
+
+                    # Check to see if the section section starts before the end of the first section
+                    if second_section_start < first_section_end:
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
         elif current_operation == 'Remove full uppercase lines':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1155,6 +1171,19 @@ class assister_application:
 
                         # Replace the actual line
                         current_data['text'][index] = regex.sub(find_string, replace_value.strip(), line)
+                elif current_operation == 'Fix time overlaps':
+                    # Check to see if the current section isn't the last section in the file
+                    if index == (len(current_data['text']) - 1):
+                        # Grab the respective time values
+                        first_section_end = datetime.strptime(current_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
+                        second_section_start_string = next_data['time'].split(' --> ')[0].strip()
+                        second_section_start = datetime.strptime(second_section_start_string, "%H:%M:%S,%f")
+
+                        # Calculate the modified second start time
+                        modified_second_start_time = first_section_end + timedelta(microseconds=1000)
+
+                        # Correct the start of the section start time to make sure it's after the first
+                        next_data['time'] = next_data['time'].replace(second_section_start_string, modified_second_start_time.strftime("%H:%M:%S,%f")[:-3])
                 elif current_operation == 'Remove full uppercase lines':
                     # Check to see if the current line is the one that matches
                     if line.isupper():
