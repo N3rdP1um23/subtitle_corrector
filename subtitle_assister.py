@@ -672,7 +672,7 @@ class assister_application:
                 closing_italics = sum(line.count('</i>') for line in section['text'])
 
                 # Check to see if there's a line that needs handling
-                if opening_italics != closing_italics:
+                if opening_italics != closing_italics and not (section['text'][-1].endswith('<i>') or section['text'][-1].endswith('</i>')):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Add space after line starting dash':
