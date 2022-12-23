@@ -485,6 +485,11 @@ class assister_application:
                 current_section = [section for section in self.file_data if section['index'] == current_line_index][0]
                 current_section['text'] = current_modifications['text']
 
+                # Check to see if the current section modifies the time stamps
+                if current_operation == 'Fix time overlaps':
+                    # Handle updating the time as well
+                    current_section['time'] = current_modifications['time']
+
                 # Check to see if the section ends up blank
                 if len(current_section['text']) == 0:
                     # Remove the current section
