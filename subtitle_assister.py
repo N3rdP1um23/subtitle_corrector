@@ -21,7 +21,8 @@ from datetime import datetime, timedelta
 class assister_application:
     # Create the class specific properties
     operations = [
-        'Add dashes to split lines',
+        'Add dashes to split lines (lowercase)',
+        'Add dashes to split lines (uppercase)',
         'Add missing italics',
         'Add space after line starting dash',
         'Add space after line starting dash and lowercase character',
@@ -49,7 +50,8 @@ class assister_application:
         'Trim long lines',
     ]
     section_spanning_operations = { # Operations that span more than one section and their respective sections they span
-        'Add dashes to split lines': 2,
+        'Add dashes to split lines (lowercase)': 2,
+        'Add dashes to split lines (uppercase)': 2,
         'Fix time overlaps': 2,
         'Remove spaced dashes from split lines': 2,
         'Replace dashes with three dots for quick lines': 2,
@@ -68,11 +70,17 @@ class assister_application:
     total_items = 0
     sections_to_modify = []
     regex_statements = {
-        'Add dashes to split lines': {
+        'Add dashes to split lines (lowercase)': {
             'positive_first_section': r'[[:lower:]](\,|\.\.\.)?(\"|\”)?(\-|\–)(\"|\”)?(\<i\>|\<\/i\>)?$',
             'negative_first_section': r'[[:lower:]](\ |\,|\.\.\.)?(\"|\”)?(\ )?(\-|\–)?(\"|\”)?(\<i\>|\<\/i\>)?$',
             'positive_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”)?(\-|\–)(\"|\”)?[[:lower:]]',
             'negative_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”)?(\-|\–)?(\"|\”)?(\ )?[[:lower:]]',
+        },
+        'Add dashes to split lines (uppercase)': {
+            'positive_first_section': r'[[:lower:]](\,|\.\.\.)?(\"|\”)?(\-|\–)(\"|\”)?(\<i\>|\<\/i\>)?$',
+            'negative_first_section': r'[[:lower:]](\ |\,|\.\.\.)?(\"|\”)?(\ )?(\-|\–)?(\"|\”)?(\<i\>|\<\/i\>)?$',
+            'positive_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”)?(\-|\–)(\"|\”)?[[:upper:]]',
+            'negative_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”)?(\-|\–)?(\"|\”)?(\ )?[[:upper:]]',
         },
         'Add space after line starting dash': r'^((\-|\–)\w|\<i\>(\-|\–)\w|(\-|\–)\<i\>\w)',
         'Add space after line starting dash and lowercase character': r'^((\-|\–)[[:lower:]]|\<i\>(\-|\–)[[:lower:]]|(\-|\–)\<i\>[[:lower:]]|(\-|\–)\"|\”[[:lower:]]|(\-|\–)\.\.\.[[:lower:]])',
@@ -653,7 +661,23 @@ class assister_application:
         sections_to_modify = []
 
         # Check to see if the user is removing uppercase sentances
-        if current_operation == 'Add dashes to split lines':
+        if current_operation == 'Add dashes to split lines (lowercase)':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if the current section isn't the last section in the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Create variables that represent different cases
+                    positive_first_section = regex.search(self.regex_statements[current_operation]['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                    negative_first_section = regex.search(self.regex_statements[current_operation]['negative_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
+                    positive_second_section = regex.search(self.regex_statements[current_operation]['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                    negative_second_section = regex.search(self.regex_statements[current_operation]['negative_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
+
+                    # Check to see if either of the sections need correcting
+                    if not bool(positive_first_section and positive_second_section) and (bool(negative_first_section and negative_second_section) or bool(positive_first_section and negative_second_section) or bool(negative_first_section and positive_second_section)):
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
+        elif current_operation == 'Add dashes to split lines (uppercase)':
             # Iterrate over each of the sections in the file
             for section_index, section_data in enumerate(self.file_data):
                 # Check to see if the current section isn't the last section in the file
@@ -860,8 +884,8 @@ class assister_application:
                 # Check to see if the current section isn't the last section in the file
                 if not section_index == (len(self.file_data) - 1):
                     # Create variables that represent different cases
-                    positive_first_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                    positive_second_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                    positive_first_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                    positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
                     first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
                     second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0].strip(), "%H:%M:%S,%f")
                     section_delta = second_section_start - first_section_end
@@ -1026,7 +1050,7 @@ class assister_application:
             # Iterate over the lines and correct the ones with the issue
             for index, line in enumerate(current_data['text'][process_line_index:].copy(), process_line_index):
                 # Check to see if the user is removing uppercase sentances
-                if current_operation == 'Add dashes to split lines':
+                if current_operation == 'Add dashes to split lines (lowercase)':
                     # Check to see if the current section isn't the last section in the file
                     if index == (len(current_data['text']) - 1):
                         # Create variables that represent different cases
@@ -1116,6 +1140,98 @@ class assister_application:
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[5:].strip()
                                 elif regex.search(r'^\<\/i\>(\-|\–)\ [[:lower:]]', next_data['text'][0].strip()): # closing italics tag, dash, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
+                if current_operation == 'Add dashes to split lines (uppercase)':
+                    # Check to see if the current section isn't the last section in the file
+                    if index == (len(current_data['text']) - 1):
+                        # Create variables that represent different cases
+                        positive_first_section = regex.search(self.regex_statements[current_operation]['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                        negative_first_section = regex.search(self.regex_statements[current_operation]['negative_first_section'], line.strip()) # Determine if the last line in the first section is incorrectly formatted as a "split line with a dash"
+                        positive_second_section = regex.search(self.regex_statements[current_operation]['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                        negative_second_section = regex.search(self.regex_statements[current_operation]['negative_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is incorrectly formatted as a "split line with a dash"
+
+                        # Check to see if either of the sections need correcting
+                        if not bool(positive_first_section and positive_second_section) and (bool(negative_first_section and negative_second_section) or bool(positive_first_section and negative_second_section) or bool(negative_first_section and positive_second_section)):
+                            # Check to see if the first section needs correcting
+                            if negative_first_section:
+                                # Check to see which scenario the line falls under and correct it accordingly
+                                if regex.search(r'[[:lower:]](\,|\.\.\.)?$', line.strip()): # word, possible special character/nothing
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip() + '-'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\ (\-|\–)$', line.strip()): # word, possible special character/nothing, spaced dash
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-2].strip() + '-'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-1].strip() + '-"'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-2].strip() + '-"'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-3].strip() + '-"'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\ (\-|\–)\<i\>$', line.strip()): # word, possible special character/nothing, spaced dash, starting italics tag
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-5].strip() + '-<i>'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\<\/i\>$', line.strip()): # word, possible special character/nothing, closing italics tag
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-4].strip() + '-</i>'
+                                elif regex.search(r'[[:lower:]](\,|\.\.\.)?\ (\-|\–)\<\/i\>$', line.strip()): # word, possible special character/nothing, spaced dash, closing italics tag
+                                    # Append the line ending dash
+                                    current_data['text'][index] = line.strip()[:-6].strip() + '-</i>'
+
+                                # Check to see if the line ending includes a comma before the dash
+                                if regex.search(r'[[:lower:]]\,(\-|\–).*$', current_data['text'][index].strip()):
+                                    # Replace the special character instance
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+                                    current_data['text'][index] = current_data['text'][index].strip().replace(',', '', 1)
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+
+                                # Check to see if the line ending includes and ellipsies before the dash
+                                if regex.search(r'[[:lower:]]\.\.\.(\-|\–).*$', current_data['text'][index].strip()):
+                                    # Replace the special character instance
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+                                    current_data['text'][index] = current_data['text'][index].strip().replace('...', '', 1)
+                                    current_data['text'][index] = current_data['text'][index].strip()[::-1]
+
+                            # Check to see if the second section needs correcting
+                            if negative_second_section:
+                                # Check to see which scenario the line falls under and correct it accordingly
+                                if regex.search(r'^[[:upper:]]', next_data['text'][0].strip()): # word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-' + next_data['text'][0].strip()
+                                if regex.search(r'^(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # dash, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
+                                elif regex.search(r'^(\"|\”)[[:upper:]]', next_data['text'][0].strip()): # quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
+                                elif regex.search(r'^(\"|\”)(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # quote, dash, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[3:].strip()
+                                elif regex.search(r'^(\"|\”)\ [[:upper:]]', next_data['text'][0].strip()): # spaced quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[2:].strip()
+                                elif regex.search(r'^\<i\>[[:upper:]]', next_data['text'][0].strip()): # starting italics tag, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[3:].strip()
+                                elif regex.search(r'^\<i\>\ [[:upper:]]', next_data['text'][0].strip()): # starting italics tag, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[4:].strip()
+                                elif regex.search(r'^\<i\>(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # starting italics tag, dash, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[5:].strip()
+                                elif regex.search(r'^\<\/i\>[[:upper:]]', next_data['text'][0].strip()): # closing italics tag, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[4:].strip()
+                                elif regex.search(r'^\<\/i\>\ [[:upper:]]', next_data['text'][0].strip()): # closing italics tag, space, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[5:].strip()
+                                elif regex.search(r'^\<\/i\>(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # closing italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
                 elif current_operation == 'Add missing italics':
@@ -1262,8 +1378,8 @@ class assister_application:
                         # Check to see if the current section isn't the last section in the file
                         if not section_index == (len(self.file_data) - 1):
                             # Create variables that represent different cases
-                            positive_first_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                            positive_second_section = regex.search(self.regex_statements['Add dashes to split lines']['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                            positive_first_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
+                            positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
                             first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
                             second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0].strip(), "%H:%M:%S,%f")
                             section_delta = second_section_start - first_section_end
