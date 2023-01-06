@@ -35,7 +35,8 @@ class assister_application:
         'Edit full uppercase lines',
         'Edit lines with colon immediately after a letter',
         'Edit lines with two or more consecutive uppercase characters',
-        'Edit lines with that don\'t have line ending punctuation',
+        'Edit lines that don\'t have line ending punctuation',
+        'Edit lines that don\'t have line ending punctuation (add dashes)',
         'Find and replace',
         'Fix time overlaps',
         'Remove full uppercase lines',
@@ -54,6 +55,7 @@ class assister_application:
     section_spanning_operations = { # Operations that span more than one section and their respective sections they span
         'Add dashes to split lines (lowercase)': 2,
         'Add dashes to split lines (uppercase)': 2,
+        'Edit lines that don\'t have line ending punctuation (add dashes)': 2,
         'Fix time overlaps': 2,
         'Remove spaced dashes from split lines': 2,
         'Replace dashes with three dots for quick lines': 2,
@@ -91,7 +93,8 @@ class assister_application:
         'Capitalize, add a period, and space people abbreviations': r'(?:^|\ |\/)(dr(?:\ |\.|\.\ )|Dr(?:\ |\.)|jr(?:\ |\.|\.\ )|Jr(?:\ |\.)|mr(?:\ |\.|\.\ )|Mr(?:\ |\.)|mrs(?:\ |\.|\.\ )|Mrs(?:\ |\.)|ms(?:\ |\.|\.\ )|Ms(?:\ |\.)|sr(?:\ |\.|\.\ )|Sr(?:\ |\.)|st(?:\ |\.|\.\ )|St(?:\ |\.))[a-zA-Z]',
         'Edit lines with colon immediately after a letter': r'\w\:',
         'Edit lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
-        'Edit lines with that don\'t have line ending punctuation': r'\w(\.\,\!\?){0}(\"|\”|\<\/i\>|\<i\>)?$',
+        'Edit lines that don\'t have line ending punctuation': r'\w(\.\,\!\?){0}(\"|\”|\<\/i\>|\<i\>)?$',
+        'Edit lines that don\'t have line ending punctuation (add dashes)': r'\w(\.\,\!\?){0}(\"|\”|\<\/i\>|\<i\>)?$',
         'Remove line ending dash': r'(\-|\–)$',
         'Remove lines with two or more consecutive uppercase characters': r'[[:upper:]]{2,}',
         'Remove space after three dots': r'\.\.\.\ ',
@@ -206,7 +209,7 @@ class assister_application:
             # Check to see if the operation is a favourite
             if not operation in operation_options:
                 # Append the operation
-                self.drpOperation['menu'].add_command(label = operation)
+                self.drpOperation['menu'].add_command(label = operation, command = tk._setit(self.selected_operation, operation))
 
         # Add the options menu to the application
         self.drpOperation.pack(pady = 5, fill = X)
@@ -872,13 +875,23 @@ class assister_application:
                 if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
-        elif current_operation == 'Edit lines with that don\'t have line ending punctuation':
+        elif current_operation == 'Edit lines that don\'t have line ending punctuation':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
                 if regex.search(self.regex_statements[current_operation], section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Edit lines that don\'t have line ending punctuation (add dashes)':
+            # Iterrate over each of the sections in the file
+            for section_index, section_data in enumerate(self.file_data):
+                # Check to see if the current section isn't the last section in the file
+                if not section_index == (len(self.file_data) - 1):
+                    # Check to see if there's a line that needs handling
+                    if regex.search(self.regex_statements[current_operation], section_data['text'][-1].strip()):
+                        # Append the sections to the list that will hold the sections that need correcting
+                        sections_to_modify.append(section_data)
+                        sections_to_modify.append(self.file_data[section_index + 1])
         elif current_operation == 'Find and replace':
             # Ask the user for a work or string to find and replace
             # Check to see if the find value is missing
@@ -1374,9 +1387,75 @@ class assister_application:
 
                             # Update the strings
                             current_data['text'][index] = current_data['text'][index].replace(match, match.strip().title() + ('.' if not match.endswith('.') and not match.endswith('. ') else '') + ' ')
-                elif current_operation in ['Edit full uppercase lines', 'Edit lines with colon immediately after a letter', 'Edit lines with two or more consecutive uppercase characters', 'Edit lines with that don\'t have line ending punctuation', 'Sanitize file']:
+                elif current_operation in ['Edit full uppercase lines', 'Edit lines with colon immediately after a letter', 'Edit lines with two or more consecutive uppercase characters', 'Edit lines that don\'t have line ending punctuation', 'Sanitize file']:
                     # Skip iteration as no modifications need to be performed
                     continue
+                elif current_operation == 'Edit lines that don\'t have line ending punctuation (add dashes)':
+                    # Check to see if the current section isn't the last section in the file
+                    if index == (len(current_data['text']) - 1):
+                        # Check to see which scenario the line falls under and correct it accordingly
+                        if regex.search(r'[[:lower:]]$', line.strip()): # word, possible special character/nothing
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip() + '-'
+                        elif regex.search(r'[[:lower:]]\ (\-|\–)$', line.strip()): # word, possible special character/nothing, spaced dash
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-2].strip() + '-'
+                        elif regex.search(r'[[:lower:]](\"|\”)$', line.strip()): # word, possible special character/nothing, quote
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-1].strip() + '-"'
+                        elif regex.search(r'[[:lower:]]\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-2].strip() + '-"'
+                        elif regex.search(r'[[:lower:]]\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-3].strip() + '-"'
+                        elif regex.search(r'[[:lower:]]\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
+                        elif regex.search(r'[[:lower:]]\ (\-|\–)\<i\>$', line.strip()): # word, possible special character/nothing, spaced dash, starting italics tag
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-5].strip() + '-<i>'
+                        elif regex.search(r'[[:lower:]]\<\/i\>$', line.strip()): # word, possible special character/nothing, closing italics tag
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-4].strip() + '-</i>'
+                        elif regex.search(r'[[:lower:]]\ (\-|\–)\<\/i\>$', line.strip()): # word, possible special character/nothing, spaced dash, closing italics tag
+                            # Append the line ending dash
+                            current_data['text'][index] = line.strip()[:-6].strip() + '-</i>'
+
+                        # Check to see which scenario the line falls under and correct it accordingly
+                        if regex.search(r'^[[:upper:]]', next_data['text'][0].strip()): # word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '-' + next_data['text'][0].strip()
+                        if regex.search(r'^(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # dash, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
+                        elif regex.search(r'^(\"|\”)[[:upper:]]', next_data['text'][0].strip()): # quote, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
+                        elif regex.search(r'^(\"|\”)(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # quote, dash, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[3:].strip()
+                        elif regex.search(r'^(\"|\”)\ [[:upper:]]', next_data['text'][0].strip()): # spaced quote, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[2:].strip()
+                        elif regex.search(r'^\<i\>[[:upper:]]', next_data['text'][0].strip()): # starting italics tag, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[3:].strip()
+                        elif regex.search(r'^\<i\>\ [[:upper:]]', next_data['text'][0].strip()): # starting italics tag, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[4:].strip()
+                        elif regex.search(r'^\<i\>(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # starting italics tag, dash, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[5:].strip()
+                        elif regex.search(r'^\<\/i\>[[:upper:]]', next_data['text'][0].strip()): # closing italics tag, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[4:].strip()
+                        elif regex.search(r'^\<\/i\>\ [[:upper:]]', next_data['text'][0].strip()): # closing italics tag, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[5:].strip()
+                        elif regex.search(r'^\<\/i\>(\-|\–)\ [[:upper:]]', next_data['text'][0].strip()): # closing italics tag, dash, space, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
                 elif current_operation == 'Find and replace':
                     # Check to see if the line has the find string
                     if self.find_and_replace['find'] in line:
