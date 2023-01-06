@@ -16,10 +16,12 @@ import os
 from tkinter.constants import BOTH, BOTTOM, DISABLED, END, HORIZONTAL, LEFT, NONE, NORMAL, NW, RIGHT, SW, TOP, VERTICAL, W, X, Y
 import regex
 from datetime import datetime, timedelta
+import json
 
 # The following is a class that's used for setting up the application GUI
 class assister_application:
     # Create the class specific properties
+    config = {}
     operations = [
         'Add dashes to split lines (lowercase)',
         'Add dashes to split lines (uppercase)',
@@ -110,8 +112,15 @@ class assister_application:
         'replace': ''
     }
 
+    # Global variables
+    favourite_operations_checkbox_values = {}
+    favourite_operations_checkboxes = {}
+
     # The following function is used as a constructor
     def __init__(self):
+        # Load the config
+        self.load_config()
+
         # Initialize the various parts of the application
         self.setup_window()
         self.setup_header()
@@ -167,14 +176,39 @@ class assister_application:
         # Add the operation label
         tk.Label(frame, text = 'Operation', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
 
+        # Create a variable that will store the options
+        operation_options = []
+
         # Sort the list of operations
         self.operations.sort()
 
+        # Check to see if there are any favourite operations
+        if 'favourite_operations' in self.config:
+            # Sort the options
+            self.config['favourite_operations'].sort()
+
+            # Append them to the operation_options list
+            operation_options = self.config['favourite_operations']
+
         # Grab the default option for the dropdown
-        self.selected_operation = tk.StringVar(frame, self.operations[0])
+        self.selected_operation = tk.StringVar(frame, operation_options[0] if len(operation_options) > 0 else self.operations[0])
 
         # Add the dropdown with the available operations
-        self.drpOperation = ttk.OptionMenu(frame, self.selected_operation, self.operations[0], *self.operations)
+        self.drpOperation = ttk.OptionMenu(frame, self.selected_operation, self.operations[0], *operation_options)
+
+        # Check to see if there's any favourite operations
+        if 'favourite_operations' in self.config and len(self.config['favourite_operations']) > 0:
+            # Add a separator
+            self.drpOperation['menu'].insert_separator(len(self.operations))
+
+        # Iterate over each of the operations
+        for operation in self.operations:
+            # Check to see if the operation is a favourite
+            if not operation in operation_options:
+                # Append the operation
+                self.drpOperation['menu'].add_command(label = operation)
+
+        # Add the options menu to the application
         self.drpOperation.pack(pady = 5, fill = X)
 
         # Add the queue label
@@ -188,6 +222,7 @@ class assister_application:
         tk.Button(frame, text = 'Start', command = self.start_operation).pack(pady = 5, fill = X)
         tk.Button(frame, text = 'Clear', command = self.clear_application).pack(pady = 5, fill = X)
         tk.Button(frame, text = 'Reset Find and Replace', command = self.clear_find_and_replace).pack(pady = 5, fill = X)
+        tk.Button(frame, text = 'Select favourite operations', command = self.select_favourite_operations).pack(pady = 5, fill = X)
 
         # Add the queue label
         tk.Label(frame, text = 'Progress', font = 'Helvetica 12 bold').pack(anchor = W, pady = 5)
@@ -326,11 +361,27 @@ class assister_application:
         # Pack the frame onto the window
         frame.pack(side = LEFT, fill = BOTH, expand = True)
 
+    # The following function is used to handle loading configuration values
+    def load_config(self):
+        # Check to see if the config file exists
+        if os.path.exists('config.json'):
+            # Read the file
+            with open("config.json", "r") as config_file:
+                # Update the local config variable
+                self.config = json.load(config_file)
+
     ###
     #
     # Action functions
     #
     ###
+
+    # The following function is used to handle writing the current config to the config file
+    def write_config(self):
+        # Open the file writer
+        with open("config.json", "w") as config_file:
+            # Write the current config to the file
+            config_file.write(json.dumps(self.config, indent = 4))
 
     # The following function is used to handle gathering the files to add to the queue
     def gather_subtitle_file(self):
@@ -406,7 +457,63 @@ class assister_application:
         self.find_and_replace['find'] = ""
         self.find_and_replace['replace'] = ""
 
-    # The foloowing function is used to handle clearing the file viewer items
+    # The following function is used to allow the user to select favourite operations
+    def select_favourite_operations(self):
+        # Create and setup the initial dialog
+        selection_dialog = tk.Toplevel(self.window)
+        selection_dialog.title("Favourite Operation Selection")
+
+        # Add an opening title
+        tk.Label(selection_dialog, text = "Select favourite operations!", font = ('Helvetica 12 bold')).pack(pady = 5, padx = 5, anchor = 'n')
+
+        # Iterate over each of the operations
+        for operation in self.operations:
+            # Create the variable that will store the value
+            self.favourite_operations_checkbox_values[operation] = tk.IntVar(master = selection_dialog, value = (1 if 'favourite_operations' in self.config and operation in self.config['favourite_operations'] else 0))
+
+            # Create and append the checkbox
+            self.favourite_operations_checkboxes[operation] = tk.Checkbutton(master = selection_dialog, text = operation, variable = self.favourite_operations_checkbox_values[operation])
+            self.favourite_operations_checkboxes[operation].pack(padx = 5, anchor = 'w')
+
+        # Append a few buttons
+        self.btnSave = tk.Button(selection_dialog, text = 'Save', command =  lambda: [self.save_favourite_operations(), selection_dialog.destroy()], width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#6DA34D', fg = 'white',
+        self.btnSave.pack(side = RIGHT, padx = 5, pady = 10)
+        self.btnClear = tk.Button(selection_dialog, text = 'Clear', command = self.clear_checkbuttons, width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#6DA34D', fg = 'white',
+        self.btnClear.pack(side = RIGHT)
+        self.btnClose = tk.Button(selection_dialog, text = 'Close', command = lambda: selection_dialog.destroy(), width = 15, height = 2, font = 'Helvetica 9 bold') # , bg = '#6DA34D', fg = 'white',
+        self.btnClose.pack(side = RIGHT, padx = 5)
+
+    # The following function is used to handle clearing the selected checkbuttons
+    def clear_checkbuttons(self):
+        # Iterate over each of the values
+        for option in self.favourite_operations_checkbox_values.values():
+            # Update the value to be unchecked
+            option.set(0)
+
+    # The following function is used to handle saving the favourite operations to config
+    def save_favourite_operations(self):
+        # Create a list that will hold the favourite operations
+        favourite_operations = []
+
+        # Iterate over each of the checkbuttons
+        for operation_name, operation_value in self.favourite_operations_checkbox_values.items():
+            # Check to see if the user has selected the option
+            if operation_value.get():
+                # Append the operation
+                favourite_operations.append(operation_name)
+
+        # Check to see if the config has a 'favourite_operations' option
+        if not 'favourite_operations' in self.config:
+            # Create the config value
+            self.config['favourite_operations'] = []
+
+        # Update the general config value
+        self.config['favourite_operations'] = favourite_operations
+
+        # Call the function to handle saving the config to a local file
+        self.write_config()
+
+    # The folowing function is used to handle clearing the file viewer items
     def clear_file_viewer(self):
         # Clear file viewer items
         self.txtFileViewer.configure(state = NORMAL)
