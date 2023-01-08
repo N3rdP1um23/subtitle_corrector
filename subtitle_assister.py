@@ -82,7 +82,7 @@ class assister_application:
         },
         'Add dashes to split lines (uppercase)': {
             'positive_first_section': r'(\d+|[[:lower:]])(\,|\.\.\.)?(\"|\”|\'|\$)?(\-|\–)(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
-            'negative_first_section': r'(\d+|[[:lower:]])(\ |\,|\.\.\.)?(\"|\”|\'|\$)?(\ )?(\-|\–)?(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
+            'negative_first_section': r'(\d+|[[:lower:]])(\ |\,)?(\"|\”|\'|\$)?(\ )?(\-|\–)?(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
             'positive_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”|\'|\$)?(\-|\–)(\"|\”|\'|\$)?(\d+|[[:upper:]])',
             'negative_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”|\'|\$)?(\-|\–)?(\ )?(\"|\”|\'|\$)?(\ )?(\d+|[[:upper:]])',
         },
