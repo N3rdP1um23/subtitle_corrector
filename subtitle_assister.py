@@ -1192,13 +1192,13 @@ class assister_application:
                                     current_data['text'][index] = line.strip()[:-2].strip() + '-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-1].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-1].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-2].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-2].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-3].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-3].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
@@ -1232,9 +1232,15 @@ class assister_application:
                                 if regex.search(r'^(\d+|[[:lower:]])', next_data['text'][0].strip()): # word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()
-                                if regex.search(r'^(\-|\–)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, word
+                                elif regex.search(r'^(\-|\–)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
+                                elif regex.search(r'^(\-|\–)\ (\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, double quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
+                                elif regex.search(r'^(\-|\–)\ (\')(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, single quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-\'' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # double quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-"' + next_data['text'][0].strip()[1:].strip()
@@ -1290,13 +1296,13 @@ class assister_application:
                                     current_data['text'][index] = line.strip()[:-2].strip() + '-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-1].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-1].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-2].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-2].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
                                     # Append the line ending dash
-                                    current_data['text'][index] = line.strip()[:-3].strip() + '-"'
+                                    current_data['text'][index] = line.strip()[:-3].strip() + '"-'
                                 elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
@@ -1330,9 +1336,15 @@ class assister_application:
                                 if regex.search(r'^(\d+|[[:upper:]])', next_data['text'][0].strip()): # word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()
-                                if regex.search(r'^(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, word
+                                elif regex.search(r'^(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
+                                elif regex.search(r'^(\-|\–)\ (\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, double quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
+                                elif regex.search(r'^(\-|\–)\ (\')(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, single quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '-\'' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
@@ -1414,13 +1426,13 @@ class assister_application:
                             current_data['text'][index] = line.strip()[:-2].strip() + '-'
                         elif regex.search(r'(\d+|[[:lower:]])(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
                             # Append the line ending dash
-                            current_data['text'][index] = line.strip()[:-1].strip() + '-"'
+                            current_data['text'][index] = line.strip()[:-1].strip() + '"-'
                         elif regex.search(r'(\d+|[[:lower:]])\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
                             # Append the line ending dash
-                            current_data['text'][index] = line.strip()[:-2].strip() + '-"'
+                            current_data['text'][index] = line.strip()[:-2].strip() + '"-'
                         elif regex.search(r'(\d+|[[:lower:]])\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
                             # Append the line ending dash
-                            current_data['text'][index] = line.strip()[:-3].strip() + '-"'
+                            current_data['text'][index] = line.strip()[:-3].strip() + '"-'
                         elif regex.search(r'(\d+|[[:lower:]])\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
                             # Append the line ending dash
                             current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
@@ -1438,9 +1450,15 @@ class assister_application:
                         if regex.search(r'^(\d+|[[:upper:]])', next_data['text'][0].strip()): # word
                             # Prepend the line starting dash
                             next_data['text'][0] = '-' + next_data['text'][0].strip()
-                        if regex.search(r'^(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, word
+                        elif regex.search(r'^(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, word
                             # Prepend the line starting dash
                             next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
+                        elif regex.search(r'^(\-|\–)\ (\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, double quote, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
+                        elif regex.search(r'^(\-|\–)\ (\')(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, single quote, word
+                            # Prepend the line starting dash
+                            next_data['text'][0] = '-\'' + next_data['text'][0].strip()[3:].strip()
                         elif regex.search(r'^(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, word
                             # Prepend the line starting dash
                             next_data['text'][0] = '-"' + next_data['text'][0].strip()[1:].strip()
