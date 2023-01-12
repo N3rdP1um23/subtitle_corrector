@@ -1237,7 +1237,7 @@ class assister_application:
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
                                 elif regex.search(r'^(\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # double quote, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[1:].strip()
                                 elif regex.search(r'^(\')(\d+|[[:lower:]])', next_data['text'][0].strip()): # single quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-\'' + next_data['text'][0].strip()[1:].strip()
@@ -1246,10 +1246,10 @@ class assister_application:
                                     next_data['text'][0] = '-$' + next_data['text'][0].strip()[1:].strip()
                                 elif regex.search(r'^(\"|\”)(\-|\–)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # quote, dash, space, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[3:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # spaced quote, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[2:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[2:].strip()
                                 elif regex.search(r'^\<i\>(\d+|[[:lower:]])', next_data['text'][0].strip()): # starting italics tag, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[3:].strip()
@@ -1344,10 +1344,10 @@ class assister_application:
                                     next_data['text'][0] = '-$' + next_data['text'][0].strip()[1:].strip()
                                 elif regex.search(r'^(\"|\”)(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, dash, space, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[3:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # spaced quote, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[2:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[2:].strip()
                                 elif regex.search(r'^\<i\>(\d+|[[:upper:]])', next_data['text'][0].strip()): # starting italics tag, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[3:].strip()
@@ -1443,7 +1443,7 @@ class assister_application:
                             next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
                         elif regex.search(r'^(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, word
                             # Prepend the line starting dash
-                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
+                            next_data['text'][0] = '-"' + next_data['text'][0].strip()[1:].strip()
                         elif regex.search(r'^(\')(\d+|[[:upper:]])', next_data['text'][0].strip()): # single quote, word
                             # Prepend the line starting dash
                             next_data['text'][0] = '-\'' + next_data['text'][0].strip()[1:].strip()
@@ -1452,10 +1452,10 @@ class assister_application:
                             next_data['text'][0] = '-$' + next_data['text'][0].strip()[1:].strip()
                         elif regex.search(r'^(\"|\”)(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, dash, space, word
                             # Prepend the line starting dash
-                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[3:].strip()
+                            next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
                         elif regex.search(r'^(\"|\”)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # spaced quote, word
                             # Prepend the line starting dash
-                            next_data['text'][0] = '"-' + next_data['text'][0].strip()[2:].strip()
+                            next_data['text'][0] = '-"' + next_data['text'][0].strip()[2:].strip()
                         elif regex.search(r'^\<i\>(\d+|[[:upper:]])', next_data['text'][0].strip()): # starting italics tag, word
                             # Prepend the line starting dash
                             next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[3:].strip()
