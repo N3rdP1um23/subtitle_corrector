@@ -75,8 +75,8 @@ class assister_application:
     sections_to_modify = []
     regex_statements = {
         'Add dashes to split lines (lowercase)': {
-            'positive_first_section': r'(\d+|[[:lower:]])(\,|\.\.\.)?(\"|\”|\'|\$)?(\-|\–)(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
-            'negative_first_section': r'(\d+|[[:lower:]])(\ |\,|\.\.\.)?(\"|\”|\'|\$)?(\ )?(\-|\–)?(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
+            'positive_first_section': r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?(\"|\”|\'|\$)?(\-|\–)(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
+            'negative_first_section': r'(\d+|[[:lower:]]|[[:upper:]])(\ |\,|\.\.\.)?(\"|\”|\'|\$)?(\ )?(\-|\–)?(\"|\”|\'|\$)?(\<i\>|\<\/i\>)?$',
             'positive_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”|\'|\$)?(\-|\–)(\"|\”|\'|\$)?(\d+|[[:lower:]])',
             'negative_second_section': r'^(\<i\>|\<\/i\>)?(\"|\”|\'|\$)?(\-|\–)?(\ )?(\"|\”|\'|\$)?(\ )?(\d+|[[:lower:]])',
         },
@@ -1184,43 +1184,43 @@ class assister_application:
                             # Check to see if the first section needs correcting
                             if negative_first_section:
                                 # Check to see which scenario the line falls under and correct it accordingly
-                                if regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?$', line.strip()): # word, possible special character/nothing
+                                if regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?$', line.strip()): # word, possible special character/nothing
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip() + '-'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)$', line.strip()): # word, possible special character/nothing, spaced dash
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\ (\-|\–)$', line.strip()): # word, possible special character/nothing, spaced dash
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-2].strip() + '-'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?(\"|\”)$', line.strip()): # word, possible special character/nothing, quote
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-1].strip() + '"-'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\ (\"|\”)$', line.strip()): # word, possible special character/nothing, spaced quote
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-2].strip() + '"-'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\ (\-|\–)(\"|\”)$', line.strip()): # word, possible special character/nothing, spaced dash, quote
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-3].strip() + '"-'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\<i\>$', line.strip()): # word, possible special character/nothing, starting italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-3].strip() + '-<i>'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)\<i\>$', line.strip()): # word, possible special character/nothing, spaced dash, starting italics tag
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\ (\-|\–)\<i\>$', line.strip()): # word, possible special character/nothing, spaced dash, starting italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-5].strip() + '-<i>'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\<\/i\>$', line.strip()): # word, possible special character/nothing, closing italics tag
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\<\/i\>$', line.strip()): # word, possible special character/nothing, closing italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-4].strip() + '-</i>'
-                                elif regex.search(r'(\d+|[[:lower:]])(\,|\.\.\.)?\ (\-|\–)\<\/i\>$', line.strip()): # word, possible special character/nothing, spaced dash, closing italics tag
+                                elif regex.search(r'(\d+|[[:lower:]]|[[:upper:]])(\,|\.\.\.)?\ (\-|\–)\<\/i\>$', line.strip()): # word, possible special character/nothing, spaced dash, closing italics tag
                                     # Append the line ending dash
                                     current_data['text'][index] = line.strip()[:-6].strip() + '-</i>'
 
                                 # Check to see if the line ending includes a comma before the dash
-                                if regex.search(r'(\d+|[[:lower:]])\,(\-|\–).*$', current_data['text'][index].strip()):
+                                if regex.search(r'(\d+|[[:lower:]]|[[:upper:]])\,(\-|\–).*$', current_data['text'][index].strip()):
                                     # Replace the special character instance
                                     current_data['text'][index] = current_data['text'][index].strip()[::-1]
                                     current_data['text'][index] = current_data['text'][index].strip().replace(',', '', 1)
                                     current_data['text'][index] = current_data['text'][index].strip()[::-1]
 
                                 # Check to see if the line ending includes and ellipsies before the dash
-                                if regex.search(r'(\d+|[[:lower:]])\.\.\.(\-|\–).*$', current_data['text'][index].strip()):
+                                if regex.search(r'(\d+|[[:lower:]]|[[:upper:]])\.\.\.(\-|\–).*$', current_data['text'][index].strip()):
                                     # Replace the special character instance
                                     current_data['text'][index] = current_data['text'][index].strip()[::-1]
                                     current_data['text'][index] = current_data['text'][index].strip().replace('...', '', 1)
