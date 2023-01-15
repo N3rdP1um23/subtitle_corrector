@@ -42,6 +42,7 @@ class assister_application:
         'Remove full uppercase lines',
         'Remove line ending dash',
         'Remove lines with two or more consecutive uppercase characters',
+        'Remove sections that don\'t have line ending punctuation',
         'Remove space after three dots and a lowercase word',
         'Remove space after three dots and an uppercase word',
         'Remove space after three dots',
@@ -947,6 +948,13 @@ class assister_application:
                 if any(regex.search(self.regex_statements[current_operation], line) for line in section['text']):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
+        elif current_operation == 'Remove sections that don\'t have line ending punctuation':
+            # Iterrate over each of the sections in the file
+            for section in self.file_data:
+                # Check to see if there's a line that needs handling
+                if any(regex.search(self.regex_statements['Edit lines that don\'t have line ending punctuation'], line) for line in section['text']):
+                    # Append the section to the list that will hold the sections that need correcting
+                    sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots':
             # Iterrate over each of the sections in the file
             for section in self.file_data:
@@ -1542,6 +1550,9 @@ class assister_application:
                     if regex.search(self.regex_statements[current_operation], line):
                         # Zero out the line
                         current_data['text'].remove(line)
+                elif current_operation == 'Remove sections that don\'t have line ending punctuation':
+                    # Empty out the lines in the section
+                    current_data['text'][index] = ''
                 elif current_operation == 'Remove space after three dots':
                     # Search the string
                     results = regex.findall(self.regex_statements[current_operation], line)
