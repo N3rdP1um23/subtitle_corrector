@@ -1347,7 +1347,7 @@ class assister_application:
                                     next_data['text'][0] = '-\'' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, word
                                     # Prepend the line starting dash
-                                    next_data['text'][0] = '"-' + next_data['text'][0].strip()[1:].strip()
+                                    next_data['text'][0] = '-"' + next_data['text'][0].strip()[1:].strip()
                                 elif regex.search(r'^(\')(\d+|[[:upper:]])', next_data['text'][0].strip()): # single quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-\'' + next_data['text'][0].strip()[1:].strip()
