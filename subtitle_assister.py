@@ -1347,10 +1347,10 @@ class assister_application:
                                 elif regex.search(r'^(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-' + next_data['text'][0].strip()[2:].strip()
-                                elif regex.search(r'^(\-|\–)\ (\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, double quote, word
+                                elif regex.search(r'^(\-|\–)\ (\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, double quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-"' + next_data['text'][0].strip()[3:].strip()
-                                elif regex.search(r'^(\-|\–)\ (\')(\d+|[[:lower:]])', next_data['text'][0].strip()): # dash, space, single quote, word
+                                elif regex.search(r'^(\-|\–)\ (\')(\d+|[[:upper:]])', next_data['text'][0].strip()): # dash, space, single quote, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '-\'' + next_data['text'][0].strip()[3:].strip()
                                 elif regex.search(r'^(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # quote, word
