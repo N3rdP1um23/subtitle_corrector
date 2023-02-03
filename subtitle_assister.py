@@ -1013,7 +1013,7 @@ class assister_application:
                 if not section_index == (len(self.file_data) - 1):
                     # Create variables that represent different cases
                     positive_first_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_first_section'], section_data['text'][-1].strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                    positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                    positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) or regex.search(self.regex_statements['Add dashes to split lines (uppercase)']['positive_second_section'], self.file_data[section_index + 1]['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
                     first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
                     second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0].strip(), "%H:%M:%S,%f")
                     section_delta = second_section_start - first_section_end
@@ -1624,7 +1624,7 @@ class assister_application:
                         if not section_index == (len(self.file_data) - 1):
                             # Create variables that represent different cases
                             positive_first_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_first_section'], line.strip()) # Determine if the last line in the first section is correctly formatted as a "split line with a dash"
-                            positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
+                            positive_second_section = regex.search(self.regex_statements['Add dashes to split lines (lowercase)']['positive_second_section'], next_data['text'][0].strip()) or regex.search(self.regex_statements['Add dashes to split lines (uppercase)']['positive_second_section'], next_data['text'][0].strip()) # Determine if the first line in the second section is correctly formatted as a "split line with a dash"
                             first_section_end = datetime.strptime(section_data['time'].split(' --> ')[-1].strip(), "%H:%M:%S,%f")
                             second_section_start = datetime.strptime(self.file_data[section_index + 1]['time'].split(' --> ')[0].strip(), "%H:%M:%S,%f")
                             section_delta = second_section_start - first_section_end
