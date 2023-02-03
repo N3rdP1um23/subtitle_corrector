@@ -1273,6 +1273,9 @@ class assister_application:
                                 elif regex.search(r'^\<i\>(\-|\–)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # starting italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[5:].strip()
+                                elif regex.search(r'^\<i\>(\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # starting italics tag, quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-"' + next_data['text'][0].strip()[4:].strip()
                                 elif regex.search(r'^\<\/i\>(\d+|[[:lower:]])', next_data['text'][0].strip()): # closing italics tag, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[4:].strip()
@@ -1282,6 +1285,9 @@ class assister_application:
                                 elif regex.search(r'^\<\/i\>(\-|\–)\ (\d+|[[:lower:]])', next_data['text'][0].strip()): # closing italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
+                                elif regex.search(r'^\<\i\>(\"|\”)(\d+|[[:lower:]])', next_data['text'][0].strip()): # ending italics tag, quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-"' + next_data['text'][0].strip()[5:].strip()
                 elif current_operation == 'Add dashes to split lines (uppercase)':
                     # Check to see if the current section isn't the last section in the file
                     if index == (len(current_data['text']) - 1):
@@ -1377,6 +1383,9 @@ class assister_application:
                                 elif regex.search(r'^\<i\>(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # starting italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '<i>-' + next_data['text'][0].strip()[5:].strip()
+                                elif regex.search(r'^\<i\>(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # starting italics tag, quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-"' + next_data['text'][0].strip()[4:].strip()
                                 elif regex.search(r'^\<\/i\>(\d+|[[:upper:]])', next_data['text'][0].strip()): # closing italics tag, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[4:].strip()
@@ -1386,6 +1395,9 @@ class assister_application:
                                 elif regex.search(r'^\<\/i\>(\-|\–)\ (\d+|[[:upper:]])', next_data['text'][0].strip()): # closing italics tag, dash, space, word
                                     # Prepend the line starting dash
                                     next_data['text'][0] = '</i>-' + next_data['text'][0].strip()[6:].strip()
+                                elif regex.search(r'^\<\i\>(\"|\”)(\d+|[[:upper:]])', next_data['text'][0].strip()): # ending italics tag, quote, word
+                                    # Prepend the line starting dash
+                                    next_data['text'][0] = '<i>-"' + next_data['text'][0].strip()[5:].strip()
                 elif current_operation == 'Add missing italics':
                     # Check to see if the current index is the last index in the list of text
                     if index == len(current_data['text']) - 1:
