@@ -952,7 +952,7 @@ class assister_application:
             # Iterrate over each of the sections in the file
             for section in self.file_data:
                 # Check to see if there's a line that needs handling
-                if any(regex.search(self.regex_statements['Edit lines that don\'t have line ending punctuation'], line) for line in section['text']):
+                if regex.search(self.regex_statements['Edit lines that don\'t have line ending punctuation'], section['text'][-1]):
                     # Append the section to the list that will hold the sections that need correcting
                     sections_to_modify.append(section)
         elif current_operation == 'Remove space after three dots':
